@@ -10,7 +10,8 @@ import SwiftUI
 struct ResultView: View {
     
     @State var viewModel: ResultViewModel
-    @State var title: String = ""
+    @State var title: String = "좋은날"
+    @State var singer: String = "IU"
     
     var body: some View {
         VStack {
@@ -18,9 +19,14 @@ struct ResultView: View {
                 TextField("제목을 입력하세요.", text: $title)
                 Button {
                     Task {
-                        await viewModel.searchSongExact(title: title, brand: "", limit: "10", page: "3")
+                        await viewModel.searchBoth(
+                            title: title,
+                            singer: singer,
+                            brand: "tj",
+                            limit: "10",
+                            page: "1"
+                        )
                     }
-                    
                 } label: {
                     Text("검색")
                 }

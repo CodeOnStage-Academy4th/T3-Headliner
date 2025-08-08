@@ -12,6 +12,7 @@ enum SongTarget {
     case latest
     case searchExact(String, String, String, String)        /// 제목 완전 일치
     case searchContains(String, String, String, String)     /// 제목 부분 일치
+    case searchTitleAndSinger(String, String, String, String, String)
 }
 
 extension SongTarget: TargetType {
@@ -30,6 +31,8 @@ extension SongTarget: TargetType {
         case .searchContains(let title, let brand, let limit, let page):
             return SongV2API.searchContains(title, brand, limit, page).apiDesc
             
+        case .searchTitleAndSinger:
+            return SongV2API.searchTitleAndSinger.apiDesc
         }
     }
     
@@ -37,7 +40,8 @@ extension SongTarget: TargetType {
         switch self {
         case .latest,
                 .searchExact,
-                .searchContains:
+                .searchContains,
+                .searchTitleAndSinger:
             return .get
         }
     }
@@ -47,29 +51,55 @@ extension SongTarget: TargetType {
         case .latest:
             return .requestPlain
             
-        case .searchExact(let title, let brand, let limit, let page):
-                 
-                return .requestParameters(
-                    parameters: [
-                        "title": title,
-                        "brand": "tj",
-                        "limit": limit,
-                        "page": page
-                    ],
-                    encoding: URLEncoding.default
-                )
+        case .searchExact(
+            let title,
+            let brand,
+            let limit,
+            let page
+        ):
             
-        case .searchContains(let title, let brand, let limit, let page):
             return .requestParameters(
-                    parameters: [
-                        "title": title,
-                        "titleLikeSide": "both",
-                        "brand": "tj",
-                        "limit": limit,
-                        "page": page
-                    ],
-                    encoding: URLEncoding.default
-                )
+                parameters: [
+                    "title": title,
+                    "brand": "tj",
+                    "limit": limit,
+                    "page": page
+                ],
+                encoding: URLEncoding.default
+            )
+            
+        case .searchContains(
+            let title,
+            let brand,
+            let limit,
+            let page
+        ):
+            return .requestParameters(
+                parameters: [
+                    "title": title,
+                    "titleLikeSide": "both",
+                    "brand": "tj",
+                    "limit": limit,
+                    "page": page
+                ],
+                encoding: URLEncoding.default
+            )
+        case .searchTitleAndSinger(
+            let title,
+            let singer,
+            let brand,
+            let limit,
+            let page
+        ):
+            let parameters = ["title": title,
+                              "titleLikeSide": "both",
+                              "singer": singer,
+                              "singerLikeSide": "both",
+                              "brand": brand,
+                              "limit": limit,
+                              "page": page
+            ]
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
         }
     }
     
@@ -77,7 +107,8 @@ extension SongTarget: TargetType {
         switch self {
         case .latest,
                 .searchExact,
-                .searchContains:
+                .searchContains,
+                .searchTitleAndSinger:
             return [:]
         }
     }

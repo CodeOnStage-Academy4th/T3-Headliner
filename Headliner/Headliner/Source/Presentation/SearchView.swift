@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SearchView: View {
-    @StateObject private var viewModel = SearchViewModel()
+    @State private var viewModel = SearchViewModel()
 
     var body: some View {
         Group {
@@ -20,10 +20,7 @@ struct SearchView: View {
                     Spacer()
                 }
             } else {
-                List(viewModel.results) { song in
-                    SongRowView(song: song)
-                }
-                .listStyle(.plain)
+                SongListView(viewModel: viewModel, songs: viewModel.results)
             }
         }
         .safeAreaInset(edge: .top) {
@@ -58,16 +55,20 @@ struct SearchBarView: View {
 }
 
 struct SongListView: View {
+    var viewModel: SearchViewModel
+    
     let songs: [Music]
     var body: some View {
         List(songs) { song in
-            SongRowView(song: song)
+            SongRowView(viewModel: viewModel, song: song)
         }
         .listStyle(.plain)
     }
 }
 
 struct SongRowView: View {
+    var viewModel: SearchViewModel
+    
     let song: Music
     var body: some View {
         HStack(spacing: 12) {
@@ -81,14 +82,24 @@ struct SongRowView: View {
             }
             .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(song.title).font(.headline).lineLimit(1)
-                Text(song.artistName).font(.subheadline).foregroundColor(.secondary).lineLimit(1)
-                if song.previewURL != nil {
-                    Text("미리듣기 가능").font(.caption2).foregroundColor(.secondary)
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(song.title).font(.headline).lineLimit(1)
+                    Text(song.artistName).font(.subheadline).foregroundColor(.secondary).lineLimit(1)
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    Task {
+                        await viewModel.addMusic(song: song)
+                    }
+                }) {
+                    Image(systemName: "plus")
                 }
             }
+            
             Spacer()
         }
     }
