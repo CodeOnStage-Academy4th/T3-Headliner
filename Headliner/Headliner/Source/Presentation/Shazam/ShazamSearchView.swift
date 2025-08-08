@@ -19,13 +19,22 @@ struct ShazamSearchView: View {
     @StateObject private var viewModel = ShazamViewModel()
     @State private var path = NavigationPath()
     
+    @State var keyword: String = ""
+    
     var body: some View {
         NavigationStack(path: $path) {
-            VStack(spacing: 24) {
-                shazamButton
-                Text("샤잠하려면 탭하세요")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.secondary)
+            ZStack {
+                LinearGradient.backgroundGradient.ignoresSafeArea(.all)
+                VStack(spacing: 24) {
+                    TextField("Search", text: $keyword)
+                        .textFieldStyle(CustomTextFieldStyle())
+                        .padding(.horizontal, 25)
+                        
+                    shazamButton
+                    Text("샤잠하려면 탭하세요")
+                        .font(.pretendardBold20)
+                        .foregroundStyle(.white.opacity(0.6))
+                }
             }
             .task {
                 await viewModel.prepare()
