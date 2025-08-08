@@ -20,6 +20,4 @@ extension Font {
     // Medium
     static let pretendardMedium16: Font = .custom("Pretendard-Medium", size: 16)        /// Medium 16
     static let pretendardMedium18: Font = .custom("Pretendard-Medium", size: 18)        /// Medium 18
-    
-
 }
