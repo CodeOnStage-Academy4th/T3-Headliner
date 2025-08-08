@@ -63,15 +63,19 @@ struct CustomTabBar: View {
                         .background(alignment: .leading) {
                             ZStack {
                                 Capsule(style: .continuous)
+                                
                                     .stroke(.gray.opacity(0.25), lineWidth: 3)
                                     .opacity(isActive ? 1 : 0)
                                 
                                 
                                 Capsule(style: .continuous)
-                                    .fill(.background)
+                                    
+                                    .fill(Color.white.opacity(0.2))
+                                    .strokeBorder(.white.opacity(0.2), lineWidth: 1)
                                     .opacity(isScrolled ? 0 : 1)
                             }
                             .compositingGroup()
+                            
                             .frame(width: tabItemWidth, height: tabItemHeight)
                             /// Scaling when drag gesture becomes active
                             .scaleEffect(isActive ? 1.3 : 1)
@@ -116,11 +120,8 @@ struct CustomTabBar: View {
             Image(systemName: tab.symbol)
                 .font(.title2)
                 .symbolVariant(.fill)
-            Text(tab.rawValue)
-                .font(.caption)
-                .lineLimit(1)
         }
-        .foregroundStyle(activeTab == tab ? accentColor : Color.primary)
+        .foregroundStyle(activeTab == tab ? Color.white : Color.white.opacity(0.2))
         .frame(width: width, height: height)
         .contentShape(.capsule)
         .simultaneousGesture(
@@ -169,6 +170,7 @@ struct CustomTabBar: View {
                 
                 Capsule(style: .continuous)
                     .fill(LinearGradient.componentGradient)
+                    .strokeBorder(Color.white.opacity(0.2))
 //
 //                Capsule(style: .continuous)
 //                    .fill(.ultraThinMaterial)
@@ -177,17 +179,11 @@ struct CustomTabBar: View {
         } else {
             ZStack {
                 Circle()
+                    .fill(LinearGradient.componentGradient)
+                    .strokeBorder(Color.white.opacity(0.2))
             }
         }
     }
-    
-    /// Expandable Search Bar
-    @ViewBuilder
-    private func ExpandableSearchBar(height: CGFloat) -> some View {
-        
-    }
-    
-    var accentColor: Color { .blue }
 }
 
 #Preview {

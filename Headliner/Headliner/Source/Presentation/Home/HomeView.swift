@@ -18,7 +18,7 @@ struct HomeView: View {
             TabView(selection: $activeTab) {
                 MainListView(isScrolled: $isScrolled, scrollOffset: $scrollOffset)
                     .tag(TabItem.resents)
-                Text("hi")
+                ShazamSearchView()
                     .tag(TabItem.shared)
                 
                 // 스크롤 감지를 위한 background GeometryReader

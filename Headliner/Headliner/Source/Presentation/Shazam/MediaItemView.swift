@@ -12,20 +12,33 @@ struct MediaItemView: View {
     let mediaItem: SHMediaItem
 
     var body: some View {
-        VStack(spacing: 16) {
-            artwork
-            VStack(spacing: 6) {
-                Text(mediaItem.title ?? "Unknown track")
-                    .font(.system(size: 24, weight: .heavy))
-                    .multilineTextAlignment(.center)
-                Text(mediaItem.artist ?? "Unknown artist")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+        ZStack {
+            LinearGradient.backgroundGradient
+            VStack(spacing: 16) {
+                artwork
+                VStack(spacing: 6) {
+                    Text(mediaItem.title ?? "Unknown track")
+                        .font(.pretendardBold20)
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                    Text(mediaItem.artist ?? "Unknown artist")
+                        .font(.pretendardSemiBold16)
+                        .foregroundStyle(.white.opacity(0.6))
+                        .multilineTextAlignment(.center)
+                }
+                
+                HStack {
+                    Button {
+                        
+                    } label: {
+                        Text("추가하기")
+                    }
+                    .buttonStyle(CustomButtonStyle())
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal, 20)
         }
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.horizontal, 20)
     }
 
     @ViewBuilder
@@ -39,9 +52,7 @@ struct MediaItemView: View {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(.secondary.opacity(0.15))
             }
-            .frame(width: 280, height: 280)
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .shadow(radius: 10)
+            .frame(width: 240, height: 240)
         } else {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(.secondary.opacity(0.15))
