@@ -1,53 +1,44 @@
-//
-//  SearchViewModel.swift
-//
-//  Created by Henry on 8/8/25.
-//
-
-import Combine
 import Foundation
 import MusicKit
+import Combine
 
-@Observable
-class SearchViewModel {
-    var query: String = "" {
-        didSet {
-            debounceTask?.cancel()
-            
-            debounceTask = Task {
-                do {
-                    try await Task.sleep(for: .milliseconds(500))
-                    
-                    await MainActor.run {
-                        if query.count >= 2 {
-                            Task {
-                                await self.search(with: self.query)
-                            }
-                        } else {
-                            self.results = []
-                        }
-                    }
-                } catch {}
-            }
-        }
-    }
-    
-    var errorMessage: String?
-    var isLoading = false
-    var isPlaying = false
-    var results: [Music] = []
-    var playList: [PlaylistMusic] = []
+class SearchViewModel: ObservableObject {
+    @Published var query: String = ""
+    @Published var errorMessage: String?
+    @Published var results: [Music] = []
+    @Published var playList: [PlaylistMusic] = []
     
     var karaokeResponse: SongResponse?
     var songService = SongService()
 
+    private var cancellables = Set<AnyCancellable>()
     private let service: MusicServicing
-    private var debounceTask: Task<Void, Error>?
 
     init(service: MusicServicing = MusicManager()) {
         self.service = service
+        bindSearchTerm()
 
         Task { _ = await service.requestAuthorization() }
+    }
+
+    private func bindSearchTerm() {
+        $query
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] term in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+
+                if term.count >= 2 {
+                    Task {
+                        await self.search(with: term)
+                    }
+                } else {
+                    self.results = []
+                }
+            }
+        }
+            .store(in: &cancellables)
     }
 
     @MainActor
@@ -55,10 +46,7 @@ class SearchViewModel {
         if term.isEmpty {
             results = []
         } else {
-            isLoading = true
             errorMessage = nil
-
-            defer { isLoading = false }
 
             do {
                 let searchResults = try await service.searchSongs(
@@ -76,21 +64,7 @@ class SearchViewModel {
     }
     
     func addMusic(song: Music) async {
-//        let titleWithNoSpaces = song.title.replacingOccurrences(of: " ", with: "")
-//        let singerWithNoSpaces = song.artistName.replacingOccurrences(of: " ", with: "")
-        
-//        Task {
-//            await getKaraokeNumber(
-//                title: titleWithNoSpaces,
-//                singer: singerWithNoSpaces,
-//                brand: "tj",
-//                limit: "10",
-//                page: "1"
-//            )
-//        }
-        
         await MainActor.run {
-//            let karaokeNum = self.karaokeResponse?.data?.first?.no
             let newPlaylistSong = PlaylistMusic(
                 id: song.id,
                 originalSong: song,
@@ -122,7 +96,7 @@ class SearchViewModel {
             )
             self.karaokeResponse = newResponse
         } catch {
-            Log.network("Result VM - searchBoth error", error)
+            // Log.network("Result VM - searchBoth error", error)
         }
     }
 }

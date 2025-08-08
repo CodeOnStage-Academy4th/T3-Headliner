@@ -1,33 +1,16 @@
-//
-//  SearchView.swift
-//  Headliner
-//
-//  Created by Rama on 8/8/25.
-//
-
 import SwiftUI
 
 struct SearchView: View {
-    var viewModel: SearchViewModel
+    // StateObject로 ViewModel을 다시 생성하도록 수정 (HomeView에서 전달받는 구조가 아니므로)
+    @ObservedObject var viewModel: SearchViewModel
 
     var body: some View {
         Group {
-            if viewModel.isLoading {
-                VStack {
-                    Spacer()
-                    ProgressView()
-                        .padding()
-                    Spacer()
-                }
-            } else {
-                SongListView(viewModel: viewModel, songs: viewModel.results)
-            }
+            SongListView(viewModel: viewModel, songs: viewModel.results)
         }
         .safeAreaInset(edge: .top) {
-            SearchBarView(text: Binding(
-                get: { viewModel.query },
-                set: { viewModel.query = $0 }
-            ))
+            // 간단한 바인딩 방식으로 복원
+            SearchBarView(text: $viewModel.query)
             .padding(.vertical, 8)
             .background(Color(.systemBackground))
         }
@@ -58,7 +41,8 @@ struct SearchBarView: View {
 }
 
 struct SongListView: View {
-    var viewModel: SearchViewModel
+    // ObservedObject로 복원
+    @ObservedObject var viewModel: SearchViewModel
     
     let songs: [Music]
     var body: some View {
@@ -70,7 +54,8 @@ struct SongListView: View {
 }
 
 struct SongRowView: View {
-    var viewModel: SearchViewModel
+    // ObservedObject로 복원
+    @ObservedObject var viewModel: SearchViewModel
     
     let song: Music
     var body: some View {

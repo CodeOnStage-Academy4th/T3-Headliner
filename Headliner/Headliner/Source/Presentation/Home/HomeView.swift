@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var viewModel = SearchViewModel()
+    @StateObject private var viewModel = SearchViewModel()
     
     @State private var activeTab: TabItem = .resents
     @State private var scrollOffset: CGFloat = 0
