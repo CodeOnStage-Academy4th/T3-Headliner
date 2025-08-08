@@ -31,6 +31,7 @@ enum TabItem: String, CaseIterable {
 
 struct CustomTabBar: View {
     
+    var isScrolled: Bool
     var showsSearchBar: Bool = false
     @Binding var activeTab: TabItem
     var onSearchBarExpanded: (Bool) -> ()
@@ -50,30 +51,36 @@ struct CustomTabBar: View {
             
             ZStack {
                 if isInitialOffsetSet {
-                    HStack(spacing: 0) {
-                        ForEach(tabs, id: \.rawValue) { tab in
-                            TabItemView(tab, width: tabItemWidth, height: tabItemHeight)
+                    HStack(spacing: 12) {
+                        HStack(spacing: 0) {
+                            ForEach(tabs, id: \.rawValue) { tab in
+                                TabItemView(tab, width: tabItemWidth, height: tabItemHeight)
+                            }
                         }
-                    }
-                    /// Draggable Active Tab
-                    .background(alignment: .leading) {
-                        ZStack {
-                            Capsule(style: .continuous)
-                                .stroke(.gray.opacity(0.25), lineWidth: 3)
-                                .opacity(isActive ? 1 : 0)
-                            
-                            Capsule(style: .continuous)
-                                .fill(.background)
+                        /// Draggable Active Tab
+                        .background(alignment: .leading) {
+                            ZStack {
+                                Capsule(style: .continuous)
+                                    .stroke(.gray.opacity(0.25), lineWidth: 3)
+                                    .opacity(isActive ? 1 : 0)
+                                
+                                Capsule(style: .continuous)
+                                    .fill(.background)
+                            }
+                            .compositingGroup()
+                            .frame(width: tabItemWidth, height: tabItemHeight)
+                            /// Scaling when drag gesture becomes active
+                            .scaleEffect(isActive ? 1.3 : 1)
+                            .offset(x: dragOffset)
                         }
-                        .compositingGroup()
-                        .frame(width: tabItemWidth, height: tabItemHeight)
-                        /// Scaling when drag gesture becomes active
-                        .scaleEffect(isActive ? 1.3 : 1)
-                        .offset(x: dragOffset)
+                        /// centering tab bar
+                        .padding(3)
+                        .background(TabBarBackground())
                     }
-                    /// centering tab bar
-                    .padding(3)
-                    .background(TabBarBackground())
+                    
+                    if showsSearchBar {
+                        
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
@@ -82,6 +89,7 @@ struct CustomTabBar: View {
                 dragOffset = CGFloat(activeTab.index) * tabItemWidth
                 isInitialOffsetSet = true
             }
+            
         }
         .frame(height: 56)
         .padding(.horizontal, 25)
@@ -89,6 +97,8 @@ struct CustomTabBar: View {
         .animation(.bouncy, value: dragOffset)
         .animation(.bouncy, value: isActive)
         .animation(.bouncy, value: activeTab)
+        .scaleEffect(isScrolled ? 0.5 : 1.0)
+//        .onChange(of: <#T##Equatable#>, <#T##action: (Equatable, Equatable) -> Void##(Equatable, Equatable) -> Void##(_ oldValue: Equatable, _ newValue: Equatable) -> Void#>)
     }
     
     /// Tab Item View
@@ -145,6 +155,7 @@ struct CustomTabBar: View {
         )
     }
     
+    /// Tab Bar Background View
     @ViewBuilder
     private func TabBarBackground() -> some View {
         ZStack {
@@ -157,6 +168,12 @@ struct CustomTabBar: View {
             Capsule(style: .continuous)
                 .fill(.ultraThinMaterial)
         }
+    }
+    
+    /// Expandable Search Bar
+    @ViewBuilder
+    private func ExpandableSearchBar(height: CGFloat) -> some View {
+        
     }
     
     var accentColor: Color { .blue }

@@ -27,24 +27,31 @@ struct HomeView: View {
                 }
                 .padding()
                 // 스크롤 감지를 위한 background GeometryReader
+                .id("top")
                 .background(
-                    GeometryReader { geometry in
+                    GeometryReader { geo in
                         Color.clear
-                            .preference(
-                                key: ScrollOffsetPreferenceKey.self,
-                                value: geometry.frame(in: .named("scrollView")).minY
-                            )
+                            .onAppear {
+                                scrollOffset = geo.frame(in: .global).minY
+                            }
+                            .onChange(of: geo.frame(in: .global).minY) { oldValue, newValue in
+                                let offset = newValue
+                                print("Real-time scroll offset: \(offset)")
+                                
+                                // 초기 위치에서 50포인트 이상 위로 올라갔을 때 (스크롤 다운)
+                                let shouldBeScrolled = offset < scrollOffset - 50
+                                
+                                if shouldBeScrolled != isScrolled {
+                                    print("TabBar scale changing: \(isScrolled) -> \(shouldBeScrolled)")
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        isScrolled = shouldBeScrolled
+                                    }
+                                }
+                            }
                     }
                 )
             }
-            .coordinateSpace(name: "scrollView")
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    scrollOffset = value
-                    // 스크롤이 50포인트 이상 내려갔을 때 축소
-                    isScrolled = value < -50
-                }
-            }
+            
             
             CustomTabBar(
                 isScrolled: isScrolled,
