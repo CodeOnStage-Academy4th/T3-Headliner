@@ -164,14 +164,14 @@ struct CustomTabBar: View {
     private func TabBarBackground() -> some View {
         if !isScrolled {
             ZStack {
-                Capsule(style: .continuous)
-                    .stroke(.gray.opacity(0.25), lineWidth: 0.25)
+//                Capsule(style: .continuous)
+//                    .stroke(.gray.opacity(0.25), lineWidth: 0.25)
                 
                 Capsule(style: .continuous)
-                    .fill(.background.opacity(0.8))
-                
-                Capsule(style: .continuous)
-                    .fill(.ultraThinMaterial)
+                    .fill(LinearGradient.componentGradient)
+//
+//                Capsule(style: .continuous)
+//                    .fill(.ultraThinMaterial)
                 
             }
         } else {

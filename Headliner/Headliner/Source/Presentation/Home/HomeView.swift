@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     
-    @State private var activeTab: TabItem = .shared
+    @State private var activeTab: TabItem = .resents
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
     
@@ -17,11 +17,15 @@ struct HomeView: View {
         ZStack(alignment: .bottom) {
             TabView(selection: $activeTab) {
                 MainListView(isScrolled: $isScrolled, scrollOffset: $scrollOffset)
+                    .tag(TabItem.resents)
+                Text("hi")
+                    .tag(TabItem.shared)
                 
                 // 스크롤 감지를 위한 background GeometryReader
-                .toolbar(.hidden, for: .tabBar)
+                    
             }
-            
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .ignoresSafeArea()
             
             
             CustomTabBar(
