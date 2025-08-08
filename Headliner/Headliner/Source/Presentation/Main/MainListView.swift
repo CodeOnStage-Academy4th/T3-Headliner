@@ -22,13 +22,21 @@ struct MainListView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient.backgroundGradient
-            .ignoresSafeArea()
-            
-            VStack(alignment: .leading, spacing: 0) {
-                titleView
-                scrollView
-                
+            if playList.isEmpty {
+                EmptyPlaylistView()
+                    .background(
+                        Image("EmptyBackground")
+                            .resizable()
+                            .scaledToFill()
+                            .ignoresSafeArea()
+                    )
+            } else {
+                LinearGradient.backgroundGradient
+                    .ignoresSafeArea()
+                VStack(alignment: .leading, spacing: 0) {
+                    titleView
+                    scrollView
+                }
             }
         }
     }
@@ -81,5 +89,29 @@ struct MainListView: View {
             }
         }
         
+    }
+}
+
+private struct EmptyPlaylistView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            Image("EmptyMic")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 88, height: 88)
+                .accessibilityHidden(true)
+
+            Text("아직 저장된 노래가 없어요")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.white)
+
+            Text("검색으로 나만의 노래 리스트를\n만들어보아요")
+                .font(.body)
+                .foregroundStyle(.white.opacity(0.7))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // 배경 그라디언트는 상위에서 이미 깔려 있음
     }
 }
