@@ -14,25 +14,32 @@ struct MusicRowView: View {
     let previewURL: URL?
 
     var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8).fill(.white.opacity(0.08))
-                // AsyncImage(url: artworkURL) { ... }
-                Image(systemName: "music.note")
-                    .imageScale(.large)
-                    .foregroundStyle(.white.opacity(0.8))
-            }
-            .frame(width: 48, height: 48)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title).foregroundStyle(.white).lineLimit(1)
-                Text(artistName).font(.footnote).foregroundStyle(.gray).lineLimit(1)
+        HStack(spacing: 20) {
+            // AsyncImage(url: artworkURL) { ... }
+            Image(systemName: "music.note")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 48, height: 48)
+                .foregroundStyle(.white.opacity(0.8))
+        
+            VStack(spacing: 0) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(title).foregroundStyle(.white).lineLimit(1).font(.pretendardSemiBold18)
+                        Text(artistName).foregroundStyle(.gray).lineLimit(1).font(.pretendardSemiBold14)
+                        
+                    }
+                    Spacer()
+                    Text("12345")
+                        .font(.pretendardSemiBold16)
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+                .padding(.vertical, 10)
                 Divider()
                     .background(.gray)
             }
-            Spacer(minLength: 12)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 25)
         .padding(.vertical, 10)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }

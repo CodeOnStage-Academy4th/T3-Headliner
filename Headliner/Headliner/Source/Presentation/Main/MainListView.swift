@@ -13,7 +13,9 @@ struct MainListView: View {
         Music(id: "\(i)", title: "어제보다 슬픈 오늘", artistName: "마크툽",
               artworkURL: nil, previewURL: nil)
     }
-
+    
+    let viewTitle: String = "나의 뮤직 리스트"
+    
     var body: some View {
         ZStack {
             LinearGradient(colors: [.black, .blue.opacity(0.6)],
@@ -21,22 +23,29 @@ struct MainListView: View {
             .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
-                Text("나의 뮤직 리스트")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 25)
-                    .padding(.bottom, 20)
-                    .padding(.top, 12)
-                
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(dummy) { t in
-                            MusicRowView(title: t.title,
-                                         artistName: t.artistName,
-                                         artworkURL: t.artworkURL,
-                                         previewURL: t.previewURL)
-                        }
-                    }
+                titleView
+                scrollView
+            }
+        }
+    }
+    
+    var titleView: some View {
+        Text(viewTitle)
+            .font(.title3.weight(.semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 25)
+            .padding(.bottom, 20)
+            .padding(.top, 12)
+    }
+    
+    var scrollView: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(dummy) { t in
+                    MusicRowView(title: t.title,
+                                 artistName: t.artistName,
+                                 artworkURL: t.artworkURL,
+                                 previewURL: t.previewURL)
                 }
             }
         }
