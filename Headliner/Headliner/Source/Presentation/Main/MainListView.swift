@@ -15,16 +15,18 @@ struct MainListView: View {
     }
     
     let viewTitle: String = "나의 뮤직 리스트"
+    @Binding var isScrolled: Bool
+    @Binding var scrollOffset: CGFloat
     
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.black, .blue.opacity(0.6)],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
+            LinearGradient.backgroundGradient
             .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 0) {
                 titleView
                 scrollView
+                
             }
         }
     }
@@ -40,6 +42,33 @@ struct MainListView: View {
     
     var scrollView: some View {
         ScrollView {
+            
+            Rectangle()
+                .fill(Color.clear)
+                .frame(height: 1)
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onAppear {
+                                scrollOffset = geo.frame(in: .global).minY
+                                print("Initial scroll offset set: \(scrollOffset)")
+                            }
+                            .onChange(of: geo.frame(in: .global).minY) { oldValue, newValue in
+                                let offset = newValue
+                                print("Current scroll offset: \(offset), Initial: \(scrollOffset)")
+                                
+                                // 초기 위치에서 50포인트 이상 위로 올라갔을 때 (스크롤 다운)
+                                let shouldBeScrolled = offset < scrollOffset - 50
+                                
+                                if shouldBeScrolled != isScrolled {
+                                    print("TabBar scale changing: \(isScrolled) -> \(shouldBeScrolled)")
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        isScrolled = shouldBeScrolled
+                                    }
+                                }
+                            }
+                    }
+                )
             LazyVStack(spacing: 0) {
                 ForEach(dummy) { t in
                     MusicRowView(title: t.title,
@@ -49,11 +78,12 @@ struct MainListView: View {
                 }
             }
         }
+        
     }
 }
 
 
 
 #Preview {
-    MainListView()
+    MainListView(isScrolled: .constant(false), scrollOffset: .constant(0))
 }
