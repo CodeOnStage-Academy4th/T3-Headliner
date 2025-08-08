@@ -1,13 +1,13 @@
 //
-//  ContentView.swift
-//  ex_MusicKit
+//  SearchView.swift
+//  Headliner
 //
-//  Created by Henry on 8/8/25.
+//  Created by Rama on 8/8/25.
 //
 
 import SwiftUI
 
-struct ContentView: View {
+struct SearchView: View {
     @StateObject private var viewModel = SearchViewModel()
 
     var body: some View {
@@ -27,29 +27,33 @@ struct ContentView: View {
             }
         }
         .safeAreaInset(edge: .top) {
-            SearchBarView(text: $viewModel.query) {
-                Task { await viewModel.searchMusic() }
-            }
+            SearchBarView(text: $viewModel.query)
             .padding(.vertical, 8)
+            .background(Color(.systemBackground))
         }
     }
 }
 
 struct SearchBarView: View {
     @Binding var text: String
-    var onSubmit: () -> Void
 
     var body: some View {
         HStack {
-            TextField("노래 검색", text: $text)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-                .submitLabel(.search)
-                .onSubmit(onSubmit)
-            Button("검색") { onSubmit() }
+            TextField("검색할 노래를 입력하세요...", text: $text)
+                .padding(7)
+                .padding(.horizontal, 25)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+                .overlay(
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundColor(.gray)
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, 8)
+                    }
+                )
         }
-        .padding()
-        .background(Color(.white))
+        .padding(.horizontal, 10)
     }
 }
 
@@ -88,8 +92,4 @@ struct SongRowView: View {
             Spacer()
         }
     }
-}
-
-#Preview {
-    ContentView()
 }
