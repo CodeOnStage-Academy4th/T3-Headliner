@@ -52,9 +52,11 @@ struct CustomTabBar: View {
             ZStack {
                 if isInitialOffsetSet {
                     HStack(spacing: 12) {
-                        HStack(spacing: 0) {
+                        let tabLayout = isScrolled ? AnyLayout(ZStackLayout()) : AnyLayout(HStackLayout(spacing: 0))
+                        tabLayout {
                             ForEach(tabs, id: \.rawValue) { tab in
                                 TabItemView(tab, width: tabItemWidth, height: tabItemHeight)
+                                    .opacity(isScrolled ? (activeTab == tab ? 1 : 0) : 1)
                             }
                         }
                         /// Draggable Active Tab
@@ -64,8 +66,10 @@ struct CustomTabBar: View {
                                     .stroke(.gray.opacity(0.25), lineWidth: 3)
                                     .opacity(isActive ? 1 : 0)
                                 
+                                
                                 Capsule(style: .continuous)
                                     .fill(.background)
+                                    .opacity(isScrolled ? 0 : 1)
                             }
                             .compositingGroup()
                             .frame(width: tabItemWidth, height: tabItemHeight)
@@ -76,10 +80,10 @@ struct CustomTabBar: View {
                         /// centering tab bar
                         .padding(3)
                         .background(TabBarBackground())
-                    }
-                    
-                    if showsSearchBar {
                         
+                        if isScrolled {
+                            Spacer()
+                        }
                     }
                 }
             }
@@ -97,8 +101,8 @@ struct CustomTabBar: View {
         .animation(.bouncy, value: dragOffset)
         .animation(.bouncy, value: isActive)
         .animation(.bouncy, value: activeTab)
-        .scaleEffect(isScrolled ? 0.5 : 1.0)
-//        .onChange(of: <#T##Equatable#>, <#T##action: (Equatable, Equatable) -> Void##(Equatable, Equatable) -> Void##(_ oldValue: Equatable, _ newValue: Equatable) -> Void#>)
+        // TODO: effect
+//        .scaleEffect(isScrolled ? 0.8 : 1.0)
     }
     
     /// Tab Item View
@@ -158,15 +162,22 @@ struct CustomTabBar: View {
     /// Tab Bar Background View
     @ViewBuilder
     private func TabBarBackground() -> some View {
-        ZStack {
-            Capsule(style: .continuous)
-                .stroke(.gray.opacity(0.25), lineWidth: 0.25)
-            
-            Capsule(style: .continuous)
-                .fill(.background.opacity(0.8))
-            
-            Capsule(style: .continuous)
-                .fill(.ultraThinMaterial)
+        if !isScrolled {
+            ZStack {
+                Capsule(style: .continuous)
+                    .stroke(.gray.opacity(0.25), lineWidth: 0.25)
+                
+                Capsule(style: .continuous)
+                    .fill(.background.opacity(0.8))
+                
+                Capsule(style: .continuous)
+                    .fill(.ultraThinMaterial)
+                
+            }
+        } else {
+            ZStack {
+                Circle()
+            }
         }
     }
     
