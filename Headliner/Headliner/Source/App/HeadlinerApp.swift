@@ -11,7 +11,7 @@ import SwiftUI
 struct HeadlinerApp: App {
     var body: some Scene {
         WindowGroup {
-            SearchView()
+            HomeView()
         }
     }
 }
