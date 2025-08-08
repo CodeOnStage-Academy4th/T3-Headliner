@@ -150,3 +150,5 @@ xcuserdata
 
 # End of https://www.toptal.com/developers/gitignore/api/xcode,macos,swift,swiftpm,swiftpackagemanager,cocoapods
 *.xcuserstate
+
+Gemini.md
