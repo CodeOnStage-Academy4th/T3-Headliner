@@ -17,9 +17,22 @@
 		6C7936DA2E461A1A001083DF /* Headliner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Headliner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		21F6F3842E46A92900B10F99 /* Exceptions for "Headliner" folder in "Headliner" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6C7936D92E461A1A001083DF /* Headliner */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6C7936DC2E461A1A001083DF /* Headliner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				21F6F3842E46A92900B10F99 /* Exceptions for "Headliner" folder in "Headliner" target */,
+			);
 			path = Headliner;
 			sourceTree = "<group>";
 		};

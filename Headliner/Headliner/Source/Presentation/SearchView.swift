@@ -1,32 +1,15 @@
-//
-//  SearchView.swift
-//  Headliner
-//
-//  Created by Rama on 8/8/25.
-//
-
 import SwiftUI
 
 struct SearchView: View {
-    @StateObject private var viewModel = SearchViewModel()
+    // StateObject로 ViewModel을 다시 생성하도록 수정 (HomeView에서 전달받는 구조가 아니므로)
+    @ObservedObject var viewModel: SearchViewModel
 
     var body: some View {
         Group {
-            if viewModel.isLoading {
-                VStack {
-                    Spacer()
-                    ProgressView()
-                        .padding()
-                    Spacer()
-                }
-            } else {
-                List(viewModel.results) { song in
-                    SongRowView(song: song)
-                }
-                .listStyle(.plain)
-            }
+            SongListView(viewModel: viewModel, songs: viewModel.results)
         }
         .safeAreaInset(edge: .top) {
+            // 간단한 바인딩 방식으로 복원
             SearchBarView(text: $viewModel.query)
             .padding(.vertical, 8)
             .background(Color(.systemBackground))
@@ -58,16 +41,22 @@ struct SearchBarView: View {
 }
 
 struct SongListView: View {
+    // ObservedObject로 복원
+    @ObservedObject var viewModel: SearchViewModel
+    
     let songs: [Music]
     var body: some View {
         List(songs) { song in
-            SongRowView(song: song)
+            SongRowView(viewModel: viewModel, song: song)
         }
         .listStyle(.plain)
     }
 }
 
 struct SongRowView: View {
+    // ObservedObject로 복원
+    @ObservedObject var viewModel: SearchViewModel
+    
     let song: Music
     var body: some View {
         HStack(spacing: 12) {
@@ -81,14 +70,24 @@ struct SongRowView: View {
             }
             .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(song.title).font(.headline).lineLimit(1)
-                Text(song.artistName).font(.subheadline).foregroundColor(.secondary).lineLimit(1)
-                if song.previewURL != nil {
-                    Text("미리듣기 가능").font(.caption2).foregroundColor(.secondary)
+            
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(song.title).font(.headline).lineLimit(1)
+                    Text(song.artistName).font(.subheadline).foregroundColor(.secondary).lineLimit(1)
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    Task {
+                        await viewModel.addMusic(song: song)
+                    }
+                }) {
+                    Image(systemName: "plus")
                 }
             }
+            
             Spacer()
         }
     }

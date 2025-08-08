@@ -13,4 +13,5 @@ struct Music: Identifiable, Hashable {
     let artistName: String
     let artworkURL: URL?
     let previewURL: URL? // 미리듣기 URL
+    let karaokeNumber: String = ""
 }

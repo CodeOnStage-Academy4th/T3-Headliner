@@ -10,9 +10,9 @@ import Moya
 import SwiftUI
 
 protocol SongServiceType {
-//    func getLatestSongs() async throws -> SongResponse // 다른 모델 써야 함
     func searchExactSongs(title: String, brand: String, limit: String, page: String) async throws -> SongResponse
     func searchContainsSongs(title: String, brand: String, limit: String, page: String) async throws -> SongResponse
+    func searchBoth(title: String, singer: String, brand: String, limit: String, page: String) async throws -> SongResponse
 }
 
 class SongService: SongServiceType {
@@ -43,6 +43,26 @@ class SongService: SongServiceType {
     func searchContainsSongs(title: String, brand: String, limit: String, page: String) async throws -> SongResponse {
         return try await withCheckedThrowingContinuation { continuation in
             provider.request(.searchContains(title, brand, limit, page)) { result in
+                switch result {
+                case .success(let response):
+                    do {
+                        let decodedResponse = try self.jsonDecoder.decode(SongResponse.self, from: response.data)
+                        continuation.resume(returning: decodedResponse)
+                    } catch {
+                        continuation.resume(throwing: error)
+                        print("포함 검색 실패")
+                    }
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                    print("포함 검색 네트워킹 실패")
+                }
+            }
+        }
+    }
+    
+    func searchBoth(title: String, singer: String, brand: String, limit: String, page: String) async throws -> SongResponse {
+        return try await withCheckedThrowingContinuation { continuation in
+            provider.request(.searchTitleAndSinger(title, singer, brand, limit, page)) { result in
                 switch result {
                 case .success(let response):
                     do {

@@ -17,12 +17,45 @@ class ResultViewModel {
 extension ResultViewModel {
     
     @MainActor
-    func searchSongExact(title: String, brand: String, limit: String, page: String) async {
+    func searchSongExact(
+        title: String,
+        brand: String,
+        limit: String,
+        page: String
+    ) async {
         do {
-            let newResponse = try await songService.searchExactSongs(title: title, brand: brand, limit: limit, page: page)
+            let newResponse = try await songService.searchExactSongs(
+                title: title,
+                brand: brand,
+                limit: limit,
+                page: page
+            )
             self.songResponse = newResponse
         } catch {
             Log.network("Result VM - searchSongExact error", error)
+        }
+    }
+    
+    @MainActor
+    func searchBoth(
+        title: String,
+        singer: String,
+        brand: String,
+        limit: String,
+        page: String
+    ) async {
+        
+        do {
+            let newResponse = try await songService.searchBoth(
+                title: title,
+                singer: singer,
+                brand: brand,
+                limit: limit,
+                page: page
+            )
+            self.songResponse = newResponse
+        } catch {
+            Log.network("Result VM - searchBoth error", error)
         }
     }
 }
