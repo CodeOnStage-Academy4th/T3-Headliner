@@ -17,7 +17,7 @@ final class MusicManager: MusicServicing {
 
     private let storefront = "kr"
     private let languageHeader = "ko-KR"
-    private let developerToken: String = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjlCNDlLOFA5WlQifQ.eyJpYXQiOjE3NTQ2ODcyNzcsImV4cCI6MTc3MDIzOTI3NywiaXNzIjoiVUg4TDQyNDRNQiJ9.EI-5rttxlG-U3bfoGDodUbMauYctYTIpj2iVZwtUh5cR_lNlz2qHhHmCIxcaVG-fSUg1d-G5mMa-0YlJNkN31w"
+    private let developerToken: String = ""
 
     private struct AppleMusicSearchResponse: Codable {
         let results: SearchResults
