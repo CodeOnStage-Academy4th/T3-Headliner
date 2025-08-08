@@ -13,38 +13,47 @@ struct HomeView: View {
     @State private var activeTab: TabItem = .resents
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
+    @EnvironmentObject var pathModel: PathModel
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $activeTab) {
-                MainListView(
-                    playList: viewModel.playList,
-                    isScrolled: $isScrolled,
-                    scrollOffset: $scrollOffset
-                )
-                    .tag(TabItem.resents)
-                ShazamSearchView()
-                    .tag(TabItem.shared)
-                
-                // 스크롤 감지를 위한 background GeometryReader
+        NavigationStack(path: $pathModel.paths){
+            ZStack(alignment: .bottom) {
+                TabView(selection: $activeTab) {
+                    MainListView(isScrolled: $isScrolled, scrollOffset: $scrollOffset)
+                        .tag(TabItem.resents)
+                    ShazamSearchView()
+                        .tag(TabItem.shared)
                     
+                    // 스크롤 감지를 위한 background GeometryReader
+                    
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .ignoresSafeArea()
+                
+                
+                CustomTabBar(
+                    isScrolled: isScrolled,
+                    showsSearchBar: true,
+                    activeTab: $activeTab
+                ) { isExpanded in
+                    // 검색바 확장/축소 처리
+                    print("Search bar expanded: \(isExpanded)")
+                } onSearchTextChanged: { searchText in
+                    // 검색 텍스트 변경 처리
+                    print("Search text: \(searchText)")
+                }
+                
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .ignoresSafeArea()
-            
-            
-            CustomTabBar(
-                isScrolled: isScrolled,
-                showsSearchBar: true,
-                activeTab: $activeTab
-            ) { isExpanded in
-                // 검색바 확장/축소 처리
-                print("Search bar expanded: \(isExpanded)")
-            } onSearchTextChanged: { searchText in
-                // 검색 텍스트 변경 처리
-                print("Search text: \(searchText)")
+            .navigationDestination(for: PathType.self) { type in
+                switch type {
+                case .loading:
+                    ShazamLoadingView()
+                case .result(let item):
+                    if let item = item.mediaItem {
+                        MediaItemView(mediaItem: item)
+                    }
+                }
             }
-            
         }
     }
 }

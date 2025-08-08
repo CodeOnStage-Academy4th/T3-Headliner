@@ -14,6 +14,7 @@ final class ShazamViewModel: ObservableObject {
     @Published var isListening: Bool = false
     @Published var currentItem: SHMediaItem?
     @Published var errorDescription: String?
+    @Published var status: Status = .search
 
     var title: String { currentItem?.title ?? "" }
     var artist: String { currentItem?.artist ?? "" }
@@ -23,6 +24,12 @@ final class ShazamViewModel: ObservableObject {
     private let library = SHLibrary.default
 
     init() {}
+    
+    enum Status {
+        case search
+        case loading
+        case completed
+    }
 
     func prepare() async {
         await managedSession.prepare()
@@ -33,6 +40,7 @@ final class ShazamViewModel: ObservableObject {
         isListening = true
         currentItem = nil
         errorDescription = nil
+        self.status = .loading
 
         Task { [weak self] in
             guard let self else { return }
@@ -46,6 +54,7 @@ final class ShazamViewModel: ObservableObject {
     func cancel() {
         managedSession.cancel()
         isListening = false
+        status = .search
     }
 
     private func handle(_ result: SHSession.Result) async {
@@ -56,6 +65,7 @@ final class ShazamViewModel: ObservableObject {
         case .match(let match):
             if let item = match.mediaItems.first {
                 currentItem = item
+                    status = .completed
             } else {
                 currentItem = nil
             }

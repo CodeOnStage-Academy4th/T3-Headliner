@@ -8,7 +8,7 @@
 import SwiftUI
 import ShazamKit
 
-private struct MediaRoute: Hashable {
+struct MediaRoute: Hashable {
     let title: String
     let artist: String
     let artworkURL: URL?
@@ -16,13 +16,14 @@ private struct MediaRoute: Hashable {
 }
 
 struct ShazamSearchView: View {
+    @EnvironmentObject var pathModel: PathModel
     @StateObject private var viewModel = ShazamViewModel()
-    @State private var path = NavigationPath()
+//    @State private var path = NavigationPath()
     
     @State var keyword: String = ""
     
     var body: some View {
-        NavigationStack(path: $path) {
+//        NavigationStack(path: $path) {
             ZStack {
                 LinearGradient.backgroundGradient.ignoresSafeArea(.all)
                 VStack(spacing: 24) {
@@ -47,26 +48,27 @@ struct ShazamSearchView: View {
                         artworkURL: item.artworkURL,
                         mediaItem: item
                     )
-                    path.append(route)
+                    pathModel.paths.append(.result(route))
                 }
             }
-            .navigationDestination(for: MediaRoute.self) { route in
-                if let mediaItem = route.mediaItem {
-                    MediaItemView(mediaItem: mediaItem)
-                } else {
-                    // TODO - 검색결과 찾을 수 없음 뷰로 이동
-                    Text("MediaItem을 찾을 수 없습니다")
-                }
-            }
-        }
+//            .navigationDestination(for: MediaRoute.self) { route in
+//                if let mediaItem = route.mediaItem {
+//                    MediaItemView(mediaItem: mediaItem)
+//                } else {
+//                    // TODO - 검색결과 찾을 수 없음 뷰로 이동
+//                    Text("MediaItem을 찾을 수 없습니다")
+//                }
+//            }
+//        }
     }
 
     private var shazamButton: some View {
-        Button(action: {
+        Button{
             if !viewModel.isListening {
                 viewModel.start()
+                pathModel.paths.append(.loading)
             }
-        }) {
+        } label: {
             Image(systemName: "shazam.logo.fill")
                 .resizable()
                 .frame(width: 52, height: 52)
