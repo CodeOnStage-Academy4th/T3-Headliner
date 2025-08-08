@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @State private var viewModel = SearchViewModel()
     
     @State private var activeTab: TabItem = .resents
     @State private var scrollOffset: CGFloat = 0
@@ -16,7 +17,11 @@ struct HomeView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $activeTab) {
-                MainListView(isScrolled: $isScrolled, scrollOffset: $scrollOffset)
+                MainListView(
+                    playList: viewModel.playList,
+                    isScrolled: $isScrolled,
+                    scrollOffset: $scrollOffset
+                )
                     .tag(TabItem.resents)
                 ShazamSearchView()
                     .tag(TabItem.shared)

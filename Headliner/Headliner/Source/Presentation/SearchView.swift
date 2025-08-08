@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SearchView: View {
-    @State private var viewModel = SearchViewModel()
+    var viewModel: SearchViewModel
 
     var body: some View {
         Group {
@@ -24,7 +24,10 @@ struct SearchView: View {
             }
         }
         .safeAreaInset(edge: .top) {
-            SearchBarView(text: $viewModel.query)
+            SearchBarView(text: Binding(
+                get: { viewModel.query },
+                set: { viewModel.query = $0 }
+            ))
             .padding(.vertical, 8)
             .background(Color(.systemBackground))
         }

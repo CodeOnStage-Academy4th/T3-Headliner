@@ -9,10 +9,12 @@ import SwiftUI
 
 struct MainListView: View {
     // TODO: 실제 데이터 연결 필요
-    let dummy: [Music] = (0..<10).map { i in
-        Music(id: "\(i)", title: "어제보다 슬픈 오늘", artistName: "마크툽",
-              artworkURL: nil, previewURL: nil)
-    }
+//    let dummy: [Music] = (0..<10).map { i in
+//        Music(id: "\(i)", title: "어제보다 슬픈 오늘", artistName: "마크툽",
+//              artworkURL: nil, previewURL: nil)
+//    }
+    
+    let playList: [PlaylistMusic]
     
     let viewTitle: String = "나의 뮤직 리스트"
     @Binding var isScrolled: Bool
@@ -70,20 +72,14 @@ struct MainListView: View {
                     }
                 )
             LazyVStack(spacing: 0) {
-                ForEach(dummy) { t in
-                    MusicRowView(title: t.title,
-                                 artistName: t.artistName,
-                                 artworkURL: t.artworkURL,
-                                 previewURL: t.previewURL)
+                ForEach(playList) { t in
+                    MusicRowView(title: t.originalSong.title,
+                                 artistName: t.originalSong.artistName,
+                                 artworkURL: t.originalSong.artworkURL,
+                                 previewURL: t.originalSong.previewURL)
                 }
             }
         }
         
     }
-}
-
-
-
-#Preview {
-    MainListView(isScrolled: .constant(false), scrollOffset: .constant(0))
 }
