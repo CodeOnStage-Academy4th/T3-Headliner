@@ -54,9 +54,13 @@ struct HomeView: View {
                             .navigationBarBackButtonHidden(true)
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarLeading) {
-                                    Button("완료") {
+                                    Button {
                                         // PathModel을 통해 루트로 돌아가기
                                         pathModel.paths.removeAll()
+                                    } label: {
+                                        Image(systemName: "chevron.left")
+                                            .foregroundColor(.gray)
+                                            .font(.system(size: 20, weight: .medium))
                                     }
                                 }
                             }

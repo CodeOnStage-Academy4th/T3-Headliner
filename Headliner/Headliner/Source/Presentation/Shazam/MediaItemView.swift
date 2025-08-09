@@ -10,10 +10,10 @@ import ShazamKit
 
 struct MediaItemView: View {
     let mediaItem: SHMediaItem
+    @EnvironmentObject var pathModel: PathModel
 
     var body: some View {
         ZStack {
-            LinearGradient.backgroundGradient
             VStack(spacing: 16) {
                 artwork
                 VStack(spacing: 6) {
@@ -39,6 +39,12 @@ struct MediaItemView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 20)
         }
+        .background(
+            Image("EmptyBackground")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+        )
     }
 
     @ViewBuilder
