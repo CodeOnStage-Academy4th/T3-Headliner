@@ -24,9 +24,8 @@ struct MusicListEmptyView: View {
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
-        .padding(.top, 200)
+        .frame(maxWidth: .infinity)
     }
 }
 
