@@ -19,7 +19,7 @@ struct HomeView: View {
         NavigationStack(path: $pathModel.paths){
             ZStack(alignment: .bottom) {
                 TabView(selection: $activeTab) {
-                    MainListView(isScrolled: $isScrolled, scrollOffset: $scrollOffset)
+                    MainListView(playList: viewModel.playList, isScrolled: $isScrolled, scrollOffset: $scrollOffset)
                         .tag(TabItem.resents)
                     ShazamSearchView()
                         .tag(TabItem.shared)
@@ -51,6 +51,15 @@ struct HomeView: View {
                 case .result(let item):
                     if let item = item.mediaItem {
                         MediaItemView(mediaItem: item)
+                            .navigationBarBackButtonHidden(true)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("완료") {
+                                        // PathModel을 통해 루트로 돌아가기
+                                        pathModel.paths.removeAll()
+                                    }
+                                }
+                            }
                     }
                 }
             }
