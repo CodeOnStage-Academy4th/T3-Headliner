@@ -15,46 +15,50 @@ struct ShazamSearchView: View {
     //    @State private var path = NavigationPath()
     
     var body: some View {
-        NavigationStack(path: $path) {
+//        NavigationStack(path: $path) {
             ZStack {
                 LinearGradient.backgroundGradient.ignoresSafeArea(.all)
-                VStack(spacing: 0) {
-                    Spacer().frame(height: 10)
-                    
-                    SearchBarView(text: $viewModel.query)
-                        .padding(.horizontal, 25)
-                        .padding(.top)
-
-                    if !viewModel.query.isEmpty {
-                        List(viewModel.results) { song in
-                            MusicRowView(
-                                title: song.title,
-                                artistName: song.artistName,
-                                artworkURL: song.artworkURL,
-                                previewURL: song.previewURL
-                            )
-                            .listRowBackground(Color.clear)
+                ScrollView {
+                    VStack(spacing: 0) {
+                        Spacer().frame(height: 100)
+                        
+                        SearchBarView(text: $viewModel.query)
+                            .padding(.horizontal, 25)
+                            .padding(.top)
+                        
+                        if !viewModel.query.isEmpty {
+                            List(viewModel.results) { song in
+                                MusicRowView(
+                                    title: song.title,
+                                    artistName: song.artistName,
+                                    artworkURL: song.artworkURL,
+                                    previewURL: song.previewURL
+                                )
+                                .listRowBackground(Color.clear)
+                            }
+                            .listStyle(.plain)
+                            .background(Color.clear)
+                        } else {
+                            Spacer()
+                            
+                            shazamButton
+                            
+                            Text("샤잠하려면 탭하세요")
+                                .font(.pretendardBold20)
+                                .foregroundStyle(.white.opacity(0.6))
+                            
+                            Spacer()
                         }
-                        .listStyle(.plain)
-                        .background(Color.clear)
-                    } else {
-                        Spacer()
-                        
-                        shazamButton
-                        
-                        Text("샤잠하려면 탭하세요")
-                            .font(.pretendardBold20)
-                            .foregroundStyle(.white.opacity(0.6))
-                        
-                        Spacer()
                     }
                 }
+                
             }
-        }
+//        }
+        
         .task {
             await viewModel.prepare()
         }
-        .onChange(of: viewModel.currentItem) { _, item in
+        .onChange(of: viewModel.currentItem) { item in
             if let item {
                 let route = MediaRoute(
                     title: item.title ?? "",
@@ -64,25 +68,14 @@ struct ShazamSearchView: View {
                 )
                 pathModel.paths.append(.result(route))
             }
-            .onChange(of: viewModel.currentItem) { _, item in
-                if let item {
-                    let route = MediaRoute(
-                        title: item.title ?? "",
-                        artist: item.artist ?? "",
-                        artworkURL: item.artworkURL,
-                        mediaItem: item
-                    )
-                    path.append(route)
-                }
-            }
-            .navigationDestination(for: MediaRoute.self) { route in
-                if let mediaItem = route.mediaItem {
-                    MediaItemView(mediaItem: mediaItem)
-                } else {
-                    Text("MediaItem을 찾을 수 없습니다")
-                }
-            }
         }
+//        .navigationDestination(for: MediaRoute.self) { route in
+//            if let mediaItem = route.mediaItem {
+//                MediaItemView(mediaItem: mediaItem)
+//            } else {
+//                Text("MediaItem을 찾을 수 없습니다")
+//            }
+//        }
     }
     
     private var shazamButton: some View {
@@ -104,7 +97,7 @@ struct ShazamSearchView: View {
 
 struct SearchBarView: View {
     @Binding var text: String
-
+    
     var body: some View {
         HStack {
             TextField("검색할 노래를 입력하세요...", text: $text)

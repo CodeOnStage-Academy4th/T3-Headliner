@@ -9,6 +9,12 @@ import Foundation
 import ShazamKit
 import Combine
 
+enum Status {
+    case search
+    case loading
+    case completed
+}
+
 @MainActor
 final class ShazamViewModel: ObservableObject {
     @Published var isListening: Bool = false
@@ -36,11 +42,7 @@ final class ShazamViewModel: ObservableObject {
     init(service: MusicServicing = MusicManager()) {
         self.service = service
         bindSearchTerm()
-    enum Status {
-        case search
-        case loading
-        case completed
-    }
+
 
         Task { _ = await service.requestAuthorization() }
     }
@@ -101,10 +103,10 @@ final class ShazamViewModel: ObservableObject {
 
                 if term.count >= 2 {
                     Task {
-                        await self.search(with: term)
+                        await self.search(with: self.query)
                     }
                 } else {
-                    self.results = []
+//                    self.results = []
                 }
             }
         }
@@ -121,11 +123,11 @@ final class ShazamViewModel: ObservableObject {
                     term: term,
                     limit: 25
                 )
-                results = searchResults.sorted {
-                    $0.title.localizedStandardCompare($1.title) == .orderedAscending
-                }
+                
+                results = searchResults
+                
             } catch {
-                results = []
+//                results = []
             }
         }
     }
