@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = SearchViewModel()
     
-    @State private var activeTab: TabItem = .resents
+    @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
     @EnvironmentObject var pathModel: PathModel

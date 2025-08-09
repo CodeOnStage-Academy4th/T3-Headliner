@@ -9,18 +9,15 @@ import SwiftUI
 
 enum TabItem: String, CaseIterable {
     
-    case resents = "Recents"
-    case shared = "Shared"
-//    case browse = "Browse"
+    case main = "Main"
+    case search = "Search"
     
-    var symbol: String {
+    var symbol: SwiftUI.Image {
         switch self {
-        case .resents:
-            return "clock.fill"
-        case .shared:
-            return "folder.fill.badge.person.crop"
-//        case .browse:
-//            return "folder.fill"
+        case .main:
+            return Image(.threeLine)
+        case .search:
+            return Image(.mag)
         }
     }
     
@@ -117,7 +114,7 @@ struct CustomTabBar: View {
         let tabCount = tabs.count - 1
         
         VStack(spacing: 6) {
-            Image(systemName: tab.symbol)
+            tab.symbol
                 .font(.title2)
                 .symbolVariant(.fill)
         }
