@@ -28,11 +28,11 @@ struct HomeView: View {
                                  isScrolled: $isScrolled,
                                  scrollOffset: $scrollOffset)
                         .background(Color.clear)
-                        .tag(TabItem.resents)
+                        .tag(TabItem.main)
 
                     ShazamSearchView()
                         .background(Color.clear)
-                        .tag(TabItem.shared)
+                        .tag(TabItem.search)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 
