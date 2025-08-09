@@ -1,12 +1,6 @@
-//
-//  ShazamSearchView.swift
-//  Headliner
-//
-//  Created by Henry on 8/9/25.
-//
-
 import SwiftUI
 import ShazamKit
+import MusicKit
 
 struct MediaRoute: Hashable {
     let title: String
@@ -20,26 +14,51 @@ struct ShazamSearchView: View {
     @StateObject private var viewModel = ShazamViewModel()
     //    @State private var path = NavigationPath()
     
-    @State var keyword: String = ""
-    
     var body: some View {
-        ZStack {
-            LinearGradient.backgroundGradient.ignoresSafeArea(.all)
-            VStack(spacing: 24) {
-                TextField("Search", text: $keyword)
-                    .textFieldStyle(CustomTextFieldStyle())
-                    .padding(.horizontal, 25)
+//        NavigationStack(path: $path) {
+            ZStack {
+                LinearGradient.backgroundGradient.ignoresSafeArea(.all)
+                ScrollView {
+                    VStack(spacing: 0) {
+                        Spacer().frame(height: 100)
+                        
+                        SearchBarView(text: $viewModel.query)
+                            .padding(.horizontal, 25)
+                            .padding(.top)
+                        
+                        if !viewModel.query.isEmpty {
+                            List(viewModel.results) { song in
+                                MusicRowView(
+                                    title: song.title,
+                                    artistName: song.artistName,
+                                    artworkURL: song.artworkURL,
+                                    previewURL: song.previewURL
+                                )
+                                .listRowBackground(Color.clear)
+                            }
+                            .listStyle(.plain)
+                            .background(Color.clear)
+                        } else {
+                            Spacer()
+                            
+                            shazamButton
+                            
+                            Text("샤잠하려면 탭하세요")
+                                .font(.pretendardBold20)
+                                .foregroundStyle(.white.opacity(0.6))
+                            
+                            Spacer()
+                        }
+                    }
+                }
                 
-                shazamButton
-                Text("샤잠하려면 탭하세요")
-                    .font(.pretendardBold20)
-                    .foregroundStyle(.white.opacity(0.6))
             }
-        }
+//        }
+        
         .task {
             await viewModel.prepare()
         }
-        .onChange(of: viewModel.currentItem) { _, item in
+        .onChange(of: viewModel.currentItem) { item in
             if let item {
                 let route = MediaRoute(
                     title: item.title ?? "",
@@ -50,6 +69,13 @@ struct ShazamSearchView: View {
                 pathModel.paths.append(.result(route))
             }
         }
+//        .navigationDestination(for: MediaRoute.self) { route in
+//            if let mediaItem = route.mediaItem {
+//                MediaItemView(mediaItem: mediaItem)
+//            } else {
+//                Text("MediaItem을 찾을 수 없습니다")
+//            }
+//        }
     }
     
     private var shazamButton: some View {
@@ -69,3 +95,13 @@ struct ShazamSearchView: View {
     }
 }
 
+struct SearchBarView: View {
+    @Binding var text: String
+    
+    var body: some View {
+        HStack {
+            TextField("검색할 노래를 입력하세요...", text: $text)
+                .textFieldStyle(CustomTextFieldStyle())
+        }
+    }
+}
