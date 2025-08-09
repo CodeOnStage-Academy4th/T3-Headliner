@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = SearchViewModel()
     
-    @State private var activeTab: TabItem = .resents
+    @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
     @EnvironmentObject var pathModel: PathModel
@@ -28,11 +28,11 @@ struct HomeView: View {
                                  isScrolled: $isScrolled,
                                  scrollOffset: $scrollOffset)
                         .background(Color.clear)
-                        .tag(TabItem.resents)
+                        .tag(TabItem.main)
 
                     ShazamSearchView()
                         .background(Color.clear)
-                        .tag(TabItem.shared)
+                        .tag(TabItem.search)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 
