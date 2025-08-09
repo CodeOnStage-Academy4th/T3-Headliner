@@ -18,18 +18,23 @@ struct HomeView: View {
     var body: some View {
         NavigationStack(path: $pathModel.paths){
             ZStack(alignment: .bottom) {
+                Image("EmptyBackground")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+
                 TabView(selection: $activeTab) {
-                    MainListView(playList: viewModel.playList, isScrolled: $isScrolled, scrollOffset: $scrollOffset)
+                    MainListView(playList: viewModel.playList,
+                                 isScrolled: $isScrolled,
+                                 scrollOffset: $scrollOffset)
+                        .background(Color.clear)
                         .tag(TabItem.resents)
+
                     ShazamSearchView()
+                        .background(Color.clear)
                         .tag(TabItem.shared)
-                    
-                    // 스크롤 감지를 위한 background GeometryReader
-                    
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .ignoresSafeArea()
-                
                 
                 CustomTabBar(
                     isScrolled: isScrolled,
@@ -42,6 +47,8 @@ struct HomeView: View {
                     // 검색 텍스트 변경 처리
                     print("Search text: \(searchText)")
                 }
+                .padding(.horizontal, 25)
+                .padding(.bottom, UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0 + 4)
                 
             }
             .navigationDestination(for: PathType.self) { type in
