@@ -27,17 +27,18 @@ struct ShazamSearchView: View {
                             .padding(.top)
                         
                         if !viewModel.query.isEmpty {
-                            List(viewModel.results) { song in
-                                MusicRowView(
-                                    title: song.title,
-                                    artistName: song.artistName,
-                                    artworkURL: song.artworkURL,
-                                    previewURL: song.previewURL
-                                )
-                                .listRowBackground(Color.clear)
+                            ScrollView {
+                                LazyVStack(spacing: 0) {
+                                    ForEach(viewModel.results) { song in
+                                        MusicRowView(
+                                            title: song.title,
+                                            artistName: song.artistName,
+                                            artworkURL: song.artworkURL,
+                                            previewURL: song.previewURL
+                                        )
+                                    }
+                                }
                             }
-                            .listStyle(.plain)
-                            .background(Color.clear)
                         } else {
                             Spacer()
                             

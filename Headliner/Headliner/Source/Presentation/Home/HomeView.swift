@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var viewModel = SearchViewModel()
+    @StateObject private var viewModel = ShazamViewModel()
     
     @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0

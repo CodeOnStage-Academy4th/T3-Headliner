@@ -23,7 +23,7 @@ struct MainListView: View {
     var body: some View {
         ZStack {
             if playList.isEmpty {
-                EmptyPlaylistView()
+                MusicListEmptyView()
                     .background(
                         Image("EmptyBackground")
                             .resizable()
