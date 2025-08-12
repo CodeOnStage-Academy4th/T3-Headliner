@@ -8,11 +8,6 @@
 import SwiftUI
 
 struct MainListView: View {
-    // TODO: 실제 데이터 연결 필요
-//    let dummy: [Music] = (0..<10).map { i in
-//        Music(id: "\(i)", title: "어제보다 슬픈 오늘", artistName: "마크툽",
-//              artworkURL: nil, previewURL: nil)
-//    }
     
     let playList: [PlaylistMusic]
     
