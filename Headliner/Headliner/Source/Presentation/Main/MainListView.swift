@@ -23,16 +23,8 @@ struct MainListView: View {
     var body: some View {
         ZStack {
             if playList.isEmpty {
-                EmptyPlaylistView()
-                    .background(
-                        Image("EmptyBackground")
-                            .resizable()
-                            .scaledToFill()
-                            .ignoresSafeArea()
-                    )
+                MusicListEmptyView()
             } else {
-                LinearGradient.backgroundGradient
-                    .ignoresSafeArea()
                 VStack(alignment: .leading, spacing: 0) {
                     titleView
                     scrollView

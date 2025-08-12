@@ -125,7 +125,6 @@ final class ShazamViewModel: ObservableObject {
                 )
                 
                 results = searchResults
-                
             } catch {
 //                results = []
             }
