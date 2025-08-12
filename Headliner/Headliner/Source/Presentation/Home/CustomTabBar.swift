@@ -97,7 +97,6 @@ struct CustomTabBar: View {
             
         }
         .frame(height: 56)
-        .padding(.horizontal, 25)
         /// Animations (Custom)
         .animation(.bouncy, value: dragOffset)
         .animation(.bouncy, value: isActive)
@@ -183,6 +182,3 @@ struct CustomTabBar: View {
     }
 }
 
-#Preview {
-    HomeView()
-}
