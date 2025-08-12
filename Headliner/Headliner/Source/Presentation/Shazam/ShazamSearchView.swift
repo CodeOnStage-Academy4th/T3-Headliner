@@ -12,54 +12,54 @@ struct MediaRoute: Hashable {
 struct ShazamSearchView: View {
     @EnvironmentObject var pathModel: PathModel
     @StateObject private var viewModel = ShazamViewModel()
-    //    @State private var path = NavigationPath()
     
     var body: some View {
-//        NavigationStack(path: $path) {
-            ZStack {
-                LinearGradient.backgroundGradient.ignoresSafeArea(.all)
-                ScrollView {
-                    VStack(spacing: 0) {
-                        Spacer().frame(height: 100)
-                        
-                        SearchBarView(text: $viewModel.query)
-                            .padding(.horizontal, 25)
-                            .padding(.top)
-                        
-                        if !viewModel.query.isEmpty {
-                            ScrollView {
-                                LazyVStack(spacing: 0) {
-                                    ForEach(viewModel.results) { song in
-                                        MusicRowView(
-                                            title: song.title,
-                                            artistName: song.artistName,
-                                            artworkURL: song.artworkURL,
-                                            previewURL: song.previewURL
-                                        )
-                                    }
-                                }
+        ZStack {
+            LinearGradient.backgroundGradient
+                .ignoresSafeArea(.all)
+            
+            VStack(spacing: 0) {
+                // 상단 고정 SearchBar
+                SearchBarView(text: $viewModel.query)
+                    .padding(.horizontal, 25)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
+                
+                // 스크롤 가능한 컨텐츠 영역
+                if !viewModel.query.isEmpty {
+                    ScrollView {
+                        LazyVStack(spacing: 0) {
+                            ForEach(viewModel.results) { song in
+                                MusicRowView(
+                                    title: song.title,
+                                    artistName: song.artistName,
+                                    artworkURL: song.artworkURL,
+                                    previewURL: song.previewURL
+                                )
                             }
-                        } else {
-                            Spacer()
-                            
-                            shazamButton
-                            
-                            Text("샤잠하려면 탭하세요")
-                                .font(.pretendardBold20)
-                                .foregroundStyle(.white.opacity(0.6))
-                            
-                            Spacer()
                         }
                     }
+                } else {
+                    VStack {
+                        Spacer(minLength: 10) // 최소 여백 보장
+                        
+                        VStack(spacing: 24) {
+                            shazamButton
+                            Text("Sing Cue 하려면 탭하세요")
+                                .font(.pretendardBold20)
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
+                        
+                        Spacer()
+                        Spacer()
+                    }
                 }
-                
             }
-//        }
-        
+        }
         .task {
             await viewModel.prepare()
         }
-        .onChange(of: viewModel.currentItem) { item in
+        .onChange(of: viewModel.currentItem) { _, item in
             if let item {
                 let route = MediaRoute(
                     title: item.title ?? "",
@@ -70,13 +70,6 @@ struct ShazamSearchView: View {
                 pathModel.paths.append(.result(route))
             }
         }
-//        .navigationDestination(for: MediaRoute.self) { route in
-//            if let mediaItem = route.mediaItem {
-//                MediaItemView(mediaItem: mediaItem)
-//            } else {
-//                Text("MediaItem을 찾을 수 없습니다")
-//            }
-//        }
     }
     
     private var shazamButton: some View {
@@ -86,9 +79,9 @@ struct ShazamSearchView: View {
                 pathModel.paths.append(.loading)
             }
         } label: {
-            Image(systemName: "shazam.logo.fill")
+            Image(.shazamButton)
                 .resizable()
-                .frame(width: 52, height: 52)
+                .frame(width: 220, height: 220)
                 .symbolEffect(.pulse, isActive: viewModel.isListening)
                 .foregroundColor(viewModel.isListening ? .orange : .blue)
         }
@@ -101,8 +94,31 @@ struct SearchBarView: View {
     
     var body: some View {
         HStack {
-            TextField("검색할 노래를 입력하세요...", text: $text)
-                .textFieldStyle(CustomTextFieldStyle())
+            TextField(
+                "",
+                text: $text,
+                prompt: Text("노래를 검색하세요").foregroundStyle(.white.opacity(0.6))
+            )
+            .textFieldStyle(CustomTextFieldStyle())
+            .padding(.leading, 20)
+            
+            if !text.isEmpty {
+                Button(action: { text = "" }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.white.opacity(0.6))
+                }
+                .padding(.trailing, 20)
+            } else {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.trailing, 20)
+            }
         }
+        .background(.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 40))
+        .overlay {
+            RoundedRectangle(cornerRadius: 40).strokeBorder(Color.white.opacity(0.6))
+        }
+        .padding(.vertical, 12)
     }
 }

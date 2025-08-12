@@ -52,7 +52,7 @@ struct HomeView: View {
                     print("Search text: \(searchText)")
                 }
                 .padding(.horizontal, 25)
-                .padding(.bottom, 50)
+                .padding(.bottom, 70)
                 .background(.clear)
             }
             .navigationDestination(for: PathType.self) { type in
