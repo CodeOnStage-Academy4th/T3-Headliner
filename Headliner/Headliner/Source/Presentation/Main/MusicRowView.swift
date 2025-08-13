@@ -14,9 +14,7 @@ struct MusicRowView: View {
     let previewURL: URL?
 
     var body: some View {
-        ZStack {
-            Color.clear
-            
+        ZStack { 
             HStack(spacing: 20) {
                 AsyncImage(url: artworkURL) { phase in
                 switch phase {

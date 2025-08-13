@@ -9,8 +9,9 @@ import SwiftUI
 import ShazamKit
 
 struct MediaItemView: View {
-    let mediaItem: SHMediaItem
     @EnvironmentObject var pathModel: PathModel
+    @EnvironmentObject var shazamVM: ShazamViewModel
+    let mediaItem: SHMediaItem
 
     var body: some View {
         ZStack {
@@ -29,7 +30,10 @@ struct MediaItemView: View {
                 
                 HStack {
                     Button {
-                        
+                        Task {
+                            let music = mediaItem.toMusic()
+                            await shazamVM.addMusic(song: music)
+                        }
                     } label: {
                         Text("추가하기")
                     }
@@ -67,20 +71,14 @@ struct MediaItemView: View {
     }
 }
 
-#Preview {
-    let item = SHMediaItem(properties: [
-        .title: "어제보다 슬픈 오늘",
-        .artist: "마크툽",
-        .artworkURL: URL(string: "https://picsum.photos/512")!
-    ])
-
-    return ZStack {
-        LinearGradient(colors: [Color(red: 0.08, green: 0.10, blue: 0.18),
-                                Color(red: 0.03, green: 0.02, blue: 0.06)],
-                       startPoint: .top, endPoint: .bottom)
-            .ignoresSafeArea()
-        MediaItemView(mediaItem: item)
-            .padding(.vertical, 24)
+extension SHMediaItem {
+    func toMusic() -> Music {
+        Music(
+            id: self.shazamID ?? UUID().uuidString,
+            title: self.title ?? "제목 없음",
+            artistName: self.artist ?? "아티스트 없음",
+            artworkURL: self.artworkURL,   // nil일 수 있음
+            previewURL: nil   // nil일 수 있음
+        )
     }
-    .preferredColorScheme(.dark)
 }

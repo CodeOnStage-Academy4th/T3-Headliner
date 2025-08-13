@@ -78,6 +78,7 @@ struct HomeView: View {
                 }
             }
         }
+        .environmentObject(viewModel)
     }
 }
 
