@@ -21,6 +21,7 @@ final class ShazamViewModel: ObservableObject {
     @Published var currentItem: SHMediaItem?
     @Published var errorDescription: String?
     @Published var status: Status = .search
+    @Published var navigationRoute: PathType?
     
     @Published var query: String = ""
     @Published var results: [Music] = []
@@ -58,6 +59,7 @@ final class ShazamViewModel: ObservableObject {
         currentItem = nil
         errorDescription = nil
         self.status = .loading
+        self.navigationRoute = .loading
         
         Task { [weak self] in
             guard let self else { return }
@@ -83,6 +85,14 @@ final class ShazamViewModel: ObservableObject {
             if let item = match.mediaItems.first {
                 currentItem = item
                 status = .completed
+                
+                let route = MediaRoute(
+                    title: item.title ?? "",
+                    artist: item.artist ?? "",
+                    artworkURL: item.artworkURL,
+                    mediaItem: item
+                )
+                self.navigationRoute = .result(route)
             } else {
                 currentItem = nil
             }
@@ -92,6 +102,23 @@ final class ShazamViewModel: ObservableObject {
             errorDescription = error.localizedDescription
             currentItem = nil
         }
+    }
+    
+    func handleMusicSelection(song: Music) {
+        let properties: [SHMediaItemProperty: Any] = [
+            .title: song.title,
+            .artist: song.artistName,
+            .artworkURL: song.artworkURL as Any
+        ]
+        let mediaItem = SHMediaItem(properties: properties)
+        
+        let route = MediaRoute(
+            title: song.title,
+            artist: song.artistName,
+            artworkURL: song.artworkURL,
+            mediaItem: mediaItem
+        )
+        self.navigationRoute = .result(route)
     }
     
     private func bindSearchTerm() {
@@ -133,16 +160,28 @@ final class ShazamViewModel: ObservableObject {
     }
     
     @MainActor
-    func addMusic(song: Music) {
-        guard playListIDs.insert(song.id).inserted else { return } // 이미 있으면 종료
+    func addMusic(song: Music) async { 
+        guard playListIDs.insert(song.id).inserted else { return }
+        
+        var fetchedKaraokeNumber: String? = nil
+        
+        await getKaraokeNumber(
+            title: song.title,
+            singer: song.artistName,
+            brand: "tj", // 기본 브랜드 "tj" 사용
+            limit: "1",  // 첫 번째 결과만 가져옴
+            page: "1"
+        )
+        fetchedKaraokeNumber = self.karaokeResponse?.data?.first?.no
+        
         let newPlaylistSong = PlaylistMusic(
             id: song.id,
             originalSong: song,
-            karaokeNumber: "000000"
+            karaokeNumber: fetchedKaraokeNumber ?? "없음"
         )
         
         self.playList.append(newPlaylistSong)
-
+        
         
         print("Playlist에 추가됨: \(newPlaylistSong.originalSong.title) - 노래방 번호: \(newPlaylistSong.karaokeNumber ?? "없음")")
         print("PlayList: \(playList)")

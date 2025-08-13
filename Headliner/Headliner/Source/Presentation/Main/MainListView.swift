@@ -72,7 +72,7 @@ struct MainListView: View {
                                  artistName: t.originalSong.artistName,
                                  artworkURL: t.originalSong.artworkURL,
                                  previewURL: t.originalSong.previewURL,
-                                 karaokeNumber: "12345")
+                                 karaokeNumber: t.karaokeNumber)
                 }
             }
         }

@@ -77,8 +77,8 @@ extension SHMediaItem {
             id: self.shazamID ?? UUID().uuidString,
             title: self.title ?? "제목 없음",
             artistName: self.artist ?? "아티스트 없음",
-            artworkURL: self.artworkURL,   // nil일 수 있음
-            previewURL: nil   // nil일 수 있음
+            artworkURL: self.artworkURL,
+            previewURL: nil
         )
     }
 }
