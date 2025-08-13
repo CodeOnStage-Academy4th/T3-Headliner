@@ -12,6 +12,7 @@ struct MusicRowView: View {
     let artistName: String
     let artworkURL: URL?
     let previewURL: URL?
+    let karaokeNumber: String?
 
     var body: some View {
         ZStack { 
@@ -43,9 +44,11 @@ struct MusicRowView: View {
                             
                         }
                         Spacer()
-                        Text("12345")
-                            .font(.pretendardSemiBold16)
-                            .foregroundStyle(.white.opacity(0.6))
+                        if let karaokeNumber {
+                            Text(karaokeNumber)
+                                .font(.pretendardSemiBold16)
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
                     }
                     .padding(.vertical, 10)
                     Divider()

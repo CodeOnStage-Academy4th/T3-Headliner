@@ -30,12 +30,30 @@ struct ShazamSearchView: View {
                     ScrollView {
                         LazyVStack(spacing: 0) {
                             ForEach(viewModel.results) { song in
-                                MusicRowView(
-                                    title: song.title,
-                                    artistName: song.artistName,
-                                    artworkURL: song.artworkURL,
-                                    previewURL: song.previewURL
-                                )
+                                Button {
+                                    let properties: [SHMediaItemProperty: Any] = [
+                                        .title: song.title,
+                                        .artist: song.artistName,
+                                        .artworkURL: song.artworkURL as Any
+                                    ]
+                                    let mediaItem = SHMediaItem(properties: properties)
+                                    
+                                    let route = MediaRoute(
+                                        title: song.title,
+                                        artist: song.artistName,
+                                        artworkURL: song.artworkURL,
+                                        mediaItem: mediaItem
+                                    )
+                                    pathModel.paths.append(.result(route))
+                                } label: {
+                                    MusicRowView(
+                                        title: song.title,
+                                        artistName: song.artistName,
+                                        artworkURL: song.artworkURL,
+                                        previewURL: song.previewURL,
+                                        karaokeNumber: nil
+                                    )
+                                }
                             }
                         }
                     }
@@ -122,3 +140,4 @@ struct SearchBarView: View {
         .padding(.vertical, 12)
     }
 }
+
