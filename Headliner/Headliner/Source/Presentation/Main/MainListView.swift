@@ -71,7 +71,8 @@ struct MainListView: View {
                     MusicRowView(title: t.originalSong.title,
                                  artistName: t.originalSong.artistName,
                                  artworkURL: t.originalSong.artworkURL,
-                                 previewURL: t.originalSong.previewURL)
+                                 previewURL: t.originalSong.previewURL,
+                                 karaokeNumber: t.karaokeNumber)
                 }
             }
         }
@@ -99,6 +100,5 @@ private struct EmptyPlaylistView: View {
         }
         .padding(.horizontal, 24)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // 배경 그라디언트는 상위에서 이미 깔려 있음
     }
 }

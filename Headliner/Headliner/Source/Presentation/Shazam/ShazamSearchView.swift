@@ -2,12 +2,7 @@ import SwiftUI
 import ShazamKit
 import MusicKit
 
-struct MediaRoute: Hashable {
-    let title: String
-    let artist: String
-    let artworkURL: URL?
-    let mediaItem: SHMediaItem?
-}
+
 
 struct ShazamSearchView: View {
     @EnvironmentObject var pathModel: PathModel
@@ -30,12 +25,17 @@ struct ShazamSearchView: View {
                     ScrollView {
                         LazyVStack(spacing: 0) {
                             ForEach(viewModel.results) { song in
-                                MusicRowView(
-                                    title: song.title,
-                                    artistName: song.artistName,
-                                    artworkURL: song.artworkURL,
-                                    previewURL: song.previewURL
-                                )
+                                Button {
+                                    viewModel.handleMusicSelection(song: song)
+                                } label: {
+                                    MusicRowView(
+                                        title: song.title,
+                                        artistName: song.artistName,
+                                        artworkURL: song.artworkURL,
+                                        previewURL: song.previewURL,
+                                        karaokeNumber: nil
+                                    )
+                                }
                             }
                         }
                     }
@@ -59,15 +59,9 @@ struct ShazamSearchView: View {
         .task {
             await viewModel.prepare()
         }
-        .onChange(of: viewModel.currentItem) { _, item in
-            if let item {
-                let route = MediaRoute(
-                    title: item.title ?? "",
-                    artist: item.artist ?? "",
-                    artworkURL: item.artworkURL,
-                    mediaItem: item
-                )
-                pathModel.paths.append(.result(route))
+        .onChange(of: viewModel.navigationRoute) { _, route in
+            if let route = route {
+                pathModel.paths.append(route)
             }
         }
     }
@@ -76,7 +70,6 @@ struct ShazamSearchView: View {
         Button{
             if !viewModel.isListening {
                 viewModel.start()
-                pathModel.paths.append(.loading)
             }
         } label: {
             Image(.shazamButton)
@@ -122,3 +115,4 @@ struct SearchBarView: View {
         .padding(.vertical, 12)
     }
 }
+
