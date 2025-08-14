@@ -10,9 +10,8 @@ import SwiftUI
 struct CustomButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            // TODO: SF Pro
             .foregroundStyle(Color.white)
-            .padding(.horizontal, 55)
+            .padding(.horizontal, 40)
             .padding(.vertical, 21)
             .background(LinearGradient.componentGradient)
             .clipShape(RoundedRectangle(cornerRadius: 30))
