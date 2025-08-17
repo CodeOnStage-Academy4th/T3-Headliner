@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-extension Color {
-    
-}
-
 public extension Color {
 
     init(hex: String) {
@@ -25,4 +21,7 @@ public extension Color {
         let b = Double((rgb >>  0) & 0xFF) / 255.0
         self.init(red: r, green: g, blue: b)
     }
+
+    static let subFontColor = Color(hex: "9A9FA5")
+    static let subFontColorAlt = Color(hex: "888A90")
 }

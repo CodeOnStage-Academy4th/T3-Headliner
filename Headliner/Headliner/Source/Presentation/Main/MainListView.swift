@@ -30,12 +30,11 @@ struct MainListView: View {
     
     var titleView: some View {
         Text(viewTitle)
-            .font(.title3.weight(.semibold))
+            .font(.pretendardBold20)
             .foregroundStyle(.white)
+            .padding(.top, 40)
             .padding(.horizontal, 25)
-            .padding(.bottom, 20)
-            .padding(.top, 12)
-    }
+            .padding(.bottom, 20)    }
     
     var scrollView: some View {
         ScrollView {
@@ -77,28 +76,5 @@ struct MainListView: View {
             }
         }
         
-    }
-}
-
-private struct EmptyPlaylistView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Image("EmptyMic")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 88, height: 88)
-                .accessibilityHidden(true)
-
-            Text("아직 저장된 노래가 없어요")
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(.white)
-
-            Text("검색으로 나만의 노래 리스트를\n만들어보아요")
-                .font(.body)
-                .foregroundStyle(.white.opacity(0.7))
-                .multilineTextAlignment(.center)
-        }
-        .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

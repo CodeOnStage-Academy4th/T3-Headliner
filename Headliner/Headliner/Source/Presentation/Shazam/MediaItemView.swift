@@ -27,6 +27,7 @@ struct MediaItemView: View {
                         .foregroundStyle(.white.opacity(0.6))
                         .multilineTextAlignment(.center)
                 }
+                .padding(.bottom, 40)
                 
                 HStack {
                     Button {
@@ -35,7 +36,13 @@ struct MediaItemView: View {
                             await shazamVM.addMusic(song: music)
                         }
                     } label: {
-                        Text("추가하기")
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus")
+                                .font(.pretendardBold20)
+                            Text("추가하기")
+                                .font(.pretendardBold20)
+                        }
+                        .multilineTextAlignment(.center)
                     }
                     .buttonStyle(CustomButtonStyle())
                 }

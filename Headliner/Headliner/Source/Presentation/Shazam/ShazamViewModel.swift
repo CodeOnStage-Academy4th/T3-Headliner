@@ -32,8 +32,7 @@ final class ShazamViewModel: ObservableObject {
     var artist: String { currentItem?.artist ?? "" }
     var artworkURL: URL? { currentItem?.artworkURL }
     
-    var karaokeResponse: SongResponse?
-    var songService = SongService()
+    var tjMediaService = TJMediaService()
     
     private var cancellables = Set<AnyCancellable>()
     private let service: MusicServicing
@@ -85,7 +84,7 @@ final class ShazamViewModel: ObservableObject {
             if let item = match.mediaItems.first {
                 currentItem = item
                 status = .completed
-                
+
                 let route = MediaRoute(
                     title: item.title ?? "",
                     artist: item.artist ?? "",
@@ -160,19 +159,13 @@ final class ShazamViewModel: ObservableObject {
     }
     
     @MainActor
-    func addMusic(song: Music) async { 
+    func addMusic(song: Music) async {
         guard playListIDs.insert(song.id).inserted else { return }
         
-        var fetchedKaraokeNumber: String? = nil
-        
-        await getKaraokeNumber(
+        let fetchedKaraokeNumber = await getKaraokeNumber(
             title: song.title,
-            singer: song.artistName,
-            brand: "tj", // 기본 브랜드 "tj" 사용
-            limit: "1",  // 첫 번째 결과만 가져옴
-            page: "1"
+            singer: song.artistName
         )
-        fetchedKaraokeNumber = self.karaokeResponse?.data?.first?.no
         
         let newPlaylistSong = PlaylistMusic(
             id: song.id,
@@ -182,28 +175,17 @@ final class ShazamViewModel: ObservableObject {
         
         self.playList.append(newPlaylistSong)
         
-        
         print("Playlist에 추가됨: \(newPlaylistSong.originalSong.title) - 노래방 번호: \(newPlaylistSong.karaokeNumber ?? "없음")")
         print("PlayList: \(playList)")
     }
     
     @MainActor
-    func getKaraokeNumber(
-        title: String,
-        singer: String,
-        brand: String,
-        limit: String,
-        page: String
-    ) async {
+    func getKaraokeNumber(title: String, singer: String) async -> String? {
         do {
-            let newResponse = try await songService.searchBoth(
-                title: title,
-                singer: singer,
-                brand: brand,
-                limit: limit,
-                page: page
-            )
-            self.karaokeResponse = newResponse
-        } catch {}
+            return try await tjMediaService.fetchKaraokeNumber(title: title, artist: singer)
+        } catch {
+            print("노래방 번호 가져오기 실패: \(error.localizedDescription)")
+            return nil
+        }
     }
 }

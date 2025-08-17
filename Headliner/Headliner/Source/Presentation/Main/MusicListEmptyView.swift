@@ -16,16 +16,16 @@ struct MusicListEmptyView: View {
                 .frame(width: 88, height: 88)
 
             Text("아직 저장된 노래가 없어요")
-                .font(.pretendardSemiBold18)
+                .font(.pretendardBold20)
                 .foregroundStyle(.white)
 
             Text("검색으로 나만의 노래 리스트를\n만들어보아요")
                 .font(.pretendardSemiBold14)
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(hex: "9A9FA5"))
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 24)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

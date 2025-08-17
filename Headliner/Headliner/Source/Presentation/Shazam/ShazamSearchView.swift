@@ -10,9 +10,6 @@ struct ShazamSearchView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient.backgroundGradient
-                .ignoresSafeArea(.all)
-            
             VStack(spacing: 0) {
                 // 상단 고정 SearchBar
                 SearchBarView(text: $viewModel.query)
@@ -55,6 +52,10 @@ struct ShazamSearchView: View {
                     }
                 }
             }
+        }
+        .background {
+            LinearGradient.backgroundGradient
+                .ignoresSafeArea(.all)
         }
         .task {
             await viewModel.prepare()
