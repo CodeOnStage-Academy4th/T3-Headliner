@@ -9,43 +9,27 @@ import SwiftUI
 import ShazamKit
 
 struct MediaItemView: View {
+    // MARK: - Properties
+
     @EnvironmentObject var pathModel: PathModel
-    @EnvironmentObject var shazamVM: ShazamViewModel
+    @EnvironmentObject var viewModel: ShazamViewModel
     let mediaItem: SHMediaItem
+    let showsRetryButton: Bool
+
+    // MARK: - Body
 
     var body: some View {
         ZStack {
+            // 메인 컨텐츠 레이아웃
             VStack(spacing: 16) {
-                artwork
-                VStack(spacing: 6) {
-                    Text(mediaItem.title ?? "Unknown track")
-                        .font(.pretendardBold20)
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                    Text(mediaItem.artist ?? "Unknown artist")
-                        .font(.pretendardSemiBold16)
-                        .foregroundStyle(.white.opacity(0.6))
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.bottom, 40)
-                
-                HStack {
-                    Button {
-                        Task {
-                            let music = mediaItem.toMusic()
-                            await shazamVM.addMusic(song: music)
-                        }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "plus")
-                                .font(.pretendardBold20)
-                            Text("추가하기")
-                                .font(.pretendardBold20)
-                        }
-                        .multilineTextAlignment(.center)
-                    }
-                    .buttonStyle(CustomButtonStyle())
-                }
+                mediaItemArtwork
+                titleAndArtist
+
+                MediaItemButtonsView(
+                    showsRetryButton: showsRetryButton,
+                    onRetry: handleRetry,
+                    onAdd: handleAdd
+                )
             }
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 20)
@@ -58,8 +42,10 @@ struct MediaItemView: View {
         )
     }
 
+    // MARK: - UI Components
+
     @ViewBuilder
-    private var artwork: some View {
+    private var mediaItemArtwork: some View {
         if let url = mediaItem.artworkURL {
             AsyncImage(url: url) { image in
                 image
@@ -76,9 +62,42 @@ struct MediaItemView: View {
                 .frame(width: 280, height: 280)
         }
     }
+
+    private var titleAndArtist: some View {
+        VStack(spacing: 6) {
+            Text(mediaItem.title ?? "Unknown track")
+                .font(.pretendardBold20)
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+            Text(mediaItem.artist ?? "Unknown artist")
+                .font(.pretendardSemiBold16)
+                .foregroundStyle(.white.opacity(0.6))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.bottom, 40)
+    }
+
+    // MARK: - Actions
+
+    private func handleRetry() {
+        pathModel.paths.removeLast()
+        pathModel.paths.append(.loading)
+        viewModel.retry()
+    }
+
+    private func handleAdd() {
+        Task {
+            let music = mediaItem.toMusic()
+            await viewModel.addMusic(song: music)
+            pathModel.paths.removeAll()
+        }
+    }
 }
 
+// MARK: - Extension
+
 extension SHMediaItem {
+    /// SHMediaItem을 로컬 Music 모델로 변환
     func toMusic() -> Music {
         Music(
             id: self.shazamID ?? UUID().uuidString,

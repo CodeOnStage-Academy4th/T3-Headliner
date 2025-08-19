@@ -10,7 +10,7 @@ import AVKit
 
 struct ShazamLoadingView: View {
     
-    private let loopingPlayer = LoopingPlayer(videoName: "background")
+    @StateObject private var loopingPlayer = LoopingPlayer(videoName: "background")
     
     var body: some View {
         GeometryReader { proxy in

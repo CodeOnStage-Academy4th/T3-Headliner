@@ -2,11 +2,9 @@ import SwiftUI
 import ShazamKit
 import MusicKit
 
-
-
 struct ShazamSearchView: View {
     @EnvironmentObject var pathModel: PathModel
-    @StateObject private var viewModel = ShazamViewModel()
+    @EnvironmentObject private var viewModel: ShazamViewModel
     
     var body: some View {
         ZStack {

@@ -48,10 +48,13 @@ struct HomeView: View {
                 switch type {
                 case .loading:
                     ShazamLoadingView()
-                case .result(let item):
-                    if let item = item.mediaItem {
-                        MediaItemView(mediaItem: item)
-                            .navigationBarBackButtonHidden(true)
+                case .result(let route):
+                    if let mediaItem = route.mediaItem {
+                        MediaItemView(
+                            mediaItem: mediaItem,
+                            showsRetryButton: route.showsRetryButton
+                        )
+                        .navigationBarBackButtonHidden(true)
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button {

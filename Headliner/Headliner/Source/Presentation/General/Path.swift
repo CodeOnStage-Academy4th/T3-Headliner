@@ -13,6 +13,7 @@ struct MediaRoute: Hashable {
     let artist: String
     let artworkURL: URL?
     let mediaItem: SHMediaItem?
+    let showsRetryButton: Bool
 }
 
 enum PathType: Hashable {

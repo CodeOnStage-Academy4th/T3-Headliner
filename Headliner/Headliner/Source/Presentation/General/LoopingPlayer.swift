@@ -7,8 +7,10 @@
 
 import AVFoundation
 import Foundation
+import Combine // 1. Combine 프레임워크를 추가합니다.
 
-final class LoopingPlayer {
+// 2. ': ObservableObject' 를 추가하여 프로토콜을 따르도록 합니다.
+final class LoopingPlayer: ObservableObject {
   let player: AVQueuePlayer
   private var looper: AVPlayerLooper?
   
@@ -17,12 +19,12 @@ final class LoopingPlayer {
     guard let url = Bundle.main.url(forResource: videoName, withExtension: videoType) else {
       fatalError("비디오 파일을 찾을 수 없습니다.")
     }
-    let asset = AVAsset(url: url)
+    let asset = AVURLAsset(url: url)
     let item = AVPlayerItem(asset: asset)
     
-    // 2) AVQueuePlayer + looper
-    self.player = AVQueuePlayer()
-    self.looper = AVPlayerLooper(player: player, templateItem: item)
+    let queuePlayer = AVQueuePlayer(playerItem: item)
+    self.player = queuePlayer
+    self.looper = AVPlayerLooper(player: queuePlayer, templateItem: item)
     
     // 3) 사운드 제거, 끝났을 때 아무 동작도 취하지 않음
     player.isMuted = true
