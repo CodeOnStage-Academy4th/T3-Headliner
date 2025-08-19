@@ -165,8 +165,8 @@ struct CustomTabBar: View {
 //                    .stroke(.gray.opacity(0.25), lineWidth: 0.25)
                 
                 Capsule(style: .continuous)
-                    .fill(LinearGradient.componentGradient)
-                    .strokeBorder(Color.white.opacity(0.2))
+                    .fill(Color(hex: "FF00FA").opacity(0.75))
+                    .strokeBorder(Color(hex: "FF00FA").opacity(0.4))
 //
 //                Capsule(style: .continuous)
 //                    .fill(.ultraThinMaterial)
@@ -175,8 +175,8 @@ struct CustomTabBar: View {
         } else {
             ZStack {
                 Circle()
-                    .fill(LinearGradient.componentGradient)
-                    .strokeBorder(Color.white.opacity(0.2))
+                    .fill(Color(hex: "FF00FA").opacity(0.75))
+                    .strokeBorder(Color(hex: "FF00FA").opacity(0.4))
             }
         }
     }
