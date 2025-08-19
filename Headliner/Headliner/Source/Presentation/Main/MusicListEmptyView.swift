@@ -10,10 +10,10 @@ import SwiftUI
 struct MusicListEmptyView: View {
     var body: some View {
         VStack(spacing: 16) {
-            Image("EmptyMic")
+            Image("EmptyMusic")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 88, height: 88)
+                .frame(width: 120, height: 120)
 
             Text("아직 저장된 노래가 없어요")
                 .font(.pretendardBold20)

@@ -24,6 +24,7 @@ struct MainListView: View {
                     titleView
                     scrollView
                 }
+                bottomDeemedlayer
             }
         }
     }
@@ -34,7 +35,7 @@ struct MainListView: View {
             .foregroundStyle(.white)
             .padding(.top, 40)
             .padding(.horizontal, 25)
-            .padding(.bottom, 20)    }
+        .padding(.bottom, 20)    }
     
     var scrollView: some View {
         ScrollView {
@@ -76,5 +77,23 @@ struct MainListView: View {
             }
         }
         
+    }
+    
+    @ViewBuilder
+    private var bottomDeemedlayer: some View {
+        VStack(spacing: 0) {
+            Spacer()
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.black.opacity(1),
+                    Color.black.opacity(0.15),
+                    Color.black.opacity(0.0)
+                ]),
+                startPoint: .bottom,
+                endPoint: .top
+            )
+            .frame(height: 200)
+        }
+        .ignoresSafeArea(edges: .bottom)
     }
 }

@@ -26,7 +26,7 @@ final class ShazamViewModel: ObservableObject {
     @Published var query: String = ""
     @Published var results: [Music] = []
     @Published private(set) var playList: [PlaylistMusic] = []
-    private var playListIDs = Set<String>()   // song.id 모음
+    private var playListIDs = Set<String>()
     
     var title: String { currentItem?.title ?? "" }
     var artist: String { currentItem?.artist ?? "" }
@@ -36,15 +36,12 @@ final class ShazamViewModel: ObservableObject {
     
     private var cancellables = Set<AnyCancellable>()
     private let service: MusicServicing
-    
     private let managedSession = SHManagedSession()
     private let library = SHLibrary.default
     
     init(service: MusicServicing = MusicManager()) {
         self.service = service
         bindSearchTerm()
-        
-        
         Task { _ = await service.requestAuthorization() }
     }
     
@@ -53,12 +50,23 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func start() {
+        startShazam(shouldTriggerNavigation: true)
+    }
+
+    func startShazamForRetry() {
+        startShazam(shouldTriggerNavigation: false)
+    }
+
+    private func startShazam(shouldTriggerNavigation: Bool) {
         guard isListening == false else { return }
         isListening = true
         currentItem = nil
         errorDescription = nil
-        self.status = .loading
-        self.navigationRoute = .loading
+        status = .loading
+        
+        if shouldTriggerNavigation {
+            navigationRoute = .loading
+        }
         
         Task { [weak self] in
             guard let self else { return }
@@ -67,7 +75,9 @@ final class ShazamViewModel: ObservableObject {
         }
     }
     
-    func retry() { start() }
+    func retry() {
+        startShazamForRetry()
+    }
     
     func cancel() {
         managedSession.cancel()
@@ -84,14 +94,15 @@ final class ShazamViewModel: ObservableObject {
             if let item = match.mediaItems.first {
                 currentItem = item
                 status = .completed
-
+                
                 let route = MediaRoute(
                     title: item.title ?? "",
                     artist: item.artist ?? "",
                     artworkURL: item.artworkURL,
-                    mediaItem: item
+                    mediaItem: item,
+                    showsRetryButton: true
                 )
-                self.navigationRoute = .result(route)
+                navigationRoute = .result(route)
             } else {
                 currentItem = nil
             }
@@ -115,9 +126,10 @@ final class ShazamViewModel: ObservableObject {
             title: song.title,
             artist: song.artistName,
             artworkURL: song.artworkURL,
-            mediaItem: mediaItem
+            mediaItem: mediaItem,
+            showsRetryButton: false
         )
-        self.navigationRoute = .result(route)
+        navigationRoute = .result(route)
     }
     
     private func bindSearchTerm() {
@@ -132,8 +144,6 @@ final class ShazamViewModel: ObservableObject {
                         Task {
                             await self.search(with: self.query)
                         }
-                    } else {
-                        //                    self.results = []
                     }
                 }
             }
@@ -150,10 +160,8 @@ final class ShazamViewModel: ObservableObject {
                     term: term,
                     limit: 25
                 )
-                
                 results = searchResults
             } catch {
-                //                results = []
             }
         }
     }
@@ -173,7 +181,7 @@ final class ShazamViewModel: ObservableObject {
             karaokeNumber: fetchedKaraokeNumber ?? "없음"
         )
         
-        self.playList.append(newPlaylistSong)
+        playList.append(newPlaylistSong)
         
         print("Playlist에 추가됨: \(newPlaylistSong.originalSong.title) - 노래방 번호: \(newPlaylistSong.karaokeNumber ?? "없음")")
         print("PlayList: \(playList)")
