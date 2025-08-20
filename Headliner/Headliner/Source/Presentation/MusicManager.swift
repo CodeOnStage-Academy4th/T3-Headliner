@@ -8,12 +8,12 @@
 import Foundation
 import MusicKit
 
-protocol MusicServicing {
+protocol MusicManagerType {
     func requestAuthorization() async -> MusicAuthorization.Status
     func searchSongs(term: String, limit: Int) async throws -> [Music]
 }
 
-final class MusicManager: MusicServicing {
+final class MusicManager: MusicManagerType {
 
     private let storefront = "kr"
     private let languageHeader = "ko-KR"
