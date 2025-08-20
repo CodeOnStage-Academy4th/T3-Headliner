@@ -6,15 +6,6 @@
 //
 
 import Foundation
-import ShazamKit
-
-struct MediaRoute: Hashable {
-    let title: String
-    let artist: String
-    let artworkURL: URL?
-    let mediaItem: SHMediaItem?
-    let showsRetryButton: Bool
-}
 
 enum PathType: Hashable {
     case loading

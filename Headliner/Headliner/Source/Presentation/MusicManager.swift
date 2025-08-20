@@ -19,36 +19,6 @@ final class MusicManager: MusicServicing {
     private let languageHeader = "ko-KR"
     private let developerToken: String = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjlCNDlLOFA5WlQifQ.eyJpYXQiOjE3NTQ2ODcyNzcsImV4cCI6MTc3MDIzOTI3NywiaXNzIjoiVUg4TDQyNDRNQiJ9.EI-5rttxlG-U3bfoGDodUbMauYctYTIpj2iVZwtUh5cR_lNlz2qHhHmCIxcaVG-fSUg1d-G5mMa-0YlJNkN31w"
 
-    private struct AppleMusicSearchResponse: Codable {
-        let results: SearchResults
-    }
-    private struct SearchResults: Codable {
-        let songs: SongData?
-    }
-    private struct SongData: Codable {
-        let data: [AppleMusicSong]
-    }
-    private struct AppleMusicSong: Codable {
-        let id: String
-        let type: String
-        let attributes: SongAttributes
-    }
-    private struct SongAttributes: Codable {
-        let name: String
-        let artistName: String
-        let albumName: String?
-        let artwork: Artwork?
-        let previews: [Preview]?
-
-        struct Artwork: Codable {
-            let url: String
-            let width: Int?
-            let height: Int?
-        }
-        struct Preview: Codable {
-            let url: String
-        }
-    }
     func requestAuthorization() async -> MusicAuthorization.Status {
         await MusicAuthorization.request()
     }
