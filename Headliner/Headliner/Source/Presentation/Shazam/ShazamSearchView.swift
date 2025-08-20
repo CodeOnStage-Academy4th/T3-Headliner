@@ -4,7 +4,7 @@ import MusicKit
 
 struct ShazamSearchView: View {
     @EnvironmentObject var pathModel: PathModel
-    @EnvironmentObject private var viewModel: ShazamViewModel
+    @State var viewModel: ShazamViewModel
     
     var body: some View {
         ZStack {
@@ -58,11 +58,11 @@ struct ShazamSearchView: View {
         .task {
             await viewModel.prepare()
         }
-        .onChange(of: viewModel.navigationRoute) { _, route in
-            if let route = route {
-                pathModel.paths.append(route)
-            }
-        }
+//        .onChange(of: viewModel.navigationRoute) { _, route in
+//            if let route = route {
+//                pathModel.paths.append(route)
+//            }
+//        }
     }
     
     private var shazamButton: some View {

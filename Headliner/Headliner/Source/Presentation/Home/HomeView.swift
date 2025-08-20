@@ -1,30 +1,35 @@
 import SwiftUI
 
 struct HomeView: View {
-    @StateObject private var viewModel = ShazamViewModel()
+    @EnvironmentObject var container: DIContainer
+    @State var playlistDataManager = PlaylistDataManager()
+//    @State private var shazamViewModel = ShazamViewModel()
     
     @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
     @State private var isKeyboardVisible: Bool = false
-    @EnvironmentObject var pathModel: PathModel
+//    @EnvironmentObject var pathModel: PathModel
     
     private var shouldShowSearchBackground: Bool {
         activeTab == .search
     }
     
     var body: some View {
-        NavigationStack(path: $pathModel.paths){
+        NavigationStack(path: container.pathModel.paths){
             ZStack(alignment: .bottom) {
                 if activeTab == .main {
                     MainListView(
-                        playList: viewModel.playList,
+                        viewModel: .init(playlistDataManager: playlistDataManager, container: container),
                         isScrolled: $isScrolled,
                         scrollOffset: $scrollOffset
                     )
                     .background(Color.clear)
                 } else {
-                    ShazamSearchView()
+//                    ShazamSearchView(viewModel: shazamViewModel)
+                    ShazamSearchView(
+                        viewModel: .init(playlistDataManager: playlistDataManager, pathModel: pathModel)
+                    )
                         .background(Color.clear)
                 }
             }
@@ -48,17 +53,25 @@ struct HomeView: View {
                 switch type {
                 case .loading:
                     ShazamLoadingView()
-                case .result(let route):
-                    if let mediaItem = route.mediaItem {
+                case .result(let item):
+                    if let mediaItem = item.mediaItem {
+//                        MediaItemView(viewModel: viewModel, mediaItem: <#T##SHMediaItem#>, showsRetryButton: <#T##Bool#>)
+                        MediaItemView(mediaItem: mediaItem, showsRetryButton: item.showsRetryButton) {
+                            <#code#>
+                        } onAddMusic: { _ in
+                            
+                        }
+
                         MediaItemView(
+                            viewModel: shazamViewModel,
                             mediaItem: mediaItem,
-                            showsRetryButton: route.showsRetryButton
+                            showsRetryButton: item.showsRetryButton
                         )
                         .navigationBarBackButtonHidden(true)
                             .toolbar {
                                 ToolbarItem(placement: .navigationBarLeading) {
                                     Button {
-                                        pathModel.paths.removeAll()
+                                        pathModel.removeAll()
                                     } label: {
                                         Image(systemName: "chevron.left")
                                             .foregroundColor(.gray)
@@ -75,7 +88,7 @@ struct HomeView: View {
                     .ignoresSafeArea()
             }
         }
-        .environmentObject(viewModel)
+//        .environmentObject(viewModel)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             isKeyboardVisible = true
         }

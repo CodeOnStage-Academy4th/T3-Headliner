@@ -12,9 +12,12 @@ struct MediaItemView: View {
     // MARK: - Properties
 
     @EnvironmentObject var pathModel: PathModel
-    @EnvironmentObject var viewModel: ShazamViewModel
+//    var viewModel: ShazamViewModel
     let mediaItem: SHMediaItem
     let showsRetryButton: Bool
+    // closure
+    var onRetry: (() -> Void)
+    var onAddMusic: ((Music) async -> Void)
 
     // MARK: - Body
 
@@ -82,14 +85,17 @@ struct MediaItemView: View {
     private func handleRetry() {
         pathModel.paths.removeLast()
         pathModel.paths.append(.loading)
-        viewModel.retry()
+//        viewModel.retry()
+        onRetry()
+        
     }
 
     private func handleAdd() {
         Task {
             let music = mediaItem.toMusic()
-            await viewModel.addMusic(song: music)
-            pathModel.paths.removeAll()
+//            await viewModel.addMusic(song: music)
+            await onAddMusic(music) // 클로저 실행
+            pathModel.removeAll()
         }
     }
 }
