@@ -6,27 +6,41 @@
 //
 
 import Foundation
+import Combine
 
-enum PathType: Hashable {
+enum PathType: Hashable, Identifiable {
     case loading
     case result(MusicSearchResult)
+    
+    var id: Int {
+        hashValue
+    }
 }
 
-//@Observable
-class PathModel: ObservableObject {
-    @Published var paths: [PathType]
+class PathModel: ObservableObjectSettable {
     
-    init(paths: [PathType] = []) {  // 빈 배열로 초기화. 앱 실행시 특정 화면을 보여주고 싶다면 해당 뷰로 초기화할 것.
+    var objectWillChange: ObservableObjectPublisher?
+    
+    var paths: [PathType] = [] {
+        didSet {
+            objectWillChange?.send()
+        }
+    }
+    
+    init(paths: [PathType] = []) {
         self.paths = paths
     }
+
     
     func append(_ path: PathType) {
         self.paths.append(path)
     }
     
     func pop() {
+        
         guard !self.paths.isEmpty else { return }
         self.paths.removeLast()
+        print("pop() - paths: \(self.paths)")
     }
     
     func removeAll() {

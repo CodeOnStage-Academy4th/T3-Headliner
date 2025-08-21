@@ -7,6 +7,8 @@
 
 import Foundation
 
+//@MainActor
+//@Observable
 class DIContainer: ObservableObject {
     var managers: ManagerType
     var pathModel: PathModel
@@ -17,6 +19,8 @@ class DIContainer: ObservableObject {
     ) {
         self.managers = managers
         self.pathModel = pathModel
+ 
+        self.pathModel.setObjectWillChange(objectWillChange)
     }
 }
 
