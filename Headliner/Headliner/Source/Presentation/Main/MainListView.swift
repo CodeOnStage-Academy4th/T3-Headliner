@@ -17,7 +17,8 @@ struct MainListView: View {
     
     var body: some View {
         ZStack {
-            if viewModel.playlistDataManager.playlists.isEmpty {
+            backgroundView
+            if viewModel.isEmptyPlaylist() {
                 MusicListEmptyView()
             } else {
                 VStack(alignment: .leading, spacing: 0) {
@@ -67,7 +68,7 @@ struct MainListView: View {
                     }
                 )
             LazyVStack(spacing: 0) {
-                ForEach(viewModel.playlistDataManager.playlists) { t in
+                ForEach(viewModel.getPlaylist()) { t in
                     MusicRowView(title: t.originalSong.title,
                                  artistName: t.originalSong.artistName,
                                  artworkURL: t.originalSong.artworkURL,
@@ -77,6 +78,10 @@ struct MainListView: View {
             }
         }
         
+    }
+    
+    private var backgroundView: some View {
+        LinearGradient.backgroundGradient
     }
     
     @ViewBuilder
