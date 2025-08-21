@@ -7,16 +7,26 @@
 
 import SwiftUI
 
-@Observable
-class PlaylistViewModel {
-//    var playlistDataManager: PlaylistDataManager
+
+//@Observable
+class PlaylistViewModel: ObservableObject {
     var container: DIContainer
     
     init(
-//        playlistDataManager: PlaylistDataManager,
         container: DIContainer
     ) {
-//        self.playlistDataManager = playlistDataManager
         self.container = container
+    }
+}
+
+extension PlaylistViewModel {
+    /// 플레이리스트가 비어있는지 확인
+    func isEmptyPlaylist() -> Bool {
+        container.managers.playlistDataManager.isEmpty()
+    }
+    
+    /// 플레이리스트 전체 목록 조회
+    func getPlaylist() -> [PlaylistMusic] {
+        container.managers.playlistDataManager.getPlaylists()
     }
 }

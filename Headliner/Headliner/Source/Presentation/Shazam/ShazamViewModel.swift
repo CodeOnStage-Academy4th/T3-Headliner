@@ -10,38 +10,35 @@ import ShazamKit
 import Combine
 import MusicKit
 
-enum Status {
-    case search
-    case loading
-    case completed
-}
 
 @MainActor
-@Observable
+//@Observable
 final class ShazamViewModel: ObservableObject {
-    var playlistDataManager: PlaylistDataManager
+//    var playlistDataManager: PlaylistDataManager
 //    var pathModel: PathModel
     var container: DIContainer
     
     var tjMediaService = TJMediaService()                   /// 곡번호
+    var destination: PathType?
     
-    private let musicManager = MusicManager()               /// 애플뮤직
-    private let shazamManager = ShazamManager()
-    private let shManagedSession = SHManagedSession()
+//    private let musicManager = MusicManager()               /// 애플뮤직
+//    private let shazamManager = ShazamManager()
+//    private let shManagedSession = SHManagedSession()
     
-    var isListening: Bool = false
-    var currentItem: SHMediaItem?
+//    var isListening: Bool = false
+    @Published var currentItem: SHMediaItem?
     var errorDescription: String?
-    var status: Status = .search
+    @Published var result: MusicSearchResult?
+//    var status: ShazamStatus = .search
 //        var navigationRoute: PathType?
     
     //    var query: String = ""
-    var query: String = "" {
+    @Published var query: String = "" {
         didSet {
             handleQueryChange(newQuery: query)
         }
     }
-    var results: [Music] = []
+    @Published var results: [Music] = []
 //        private(set) var playList: [PlaylistMusic] = []
     private var playListIDs = Set<String>()
     
@@ -56,16 +53,12 @@ final class ShazamViewModel: ObservableObject {
     
     //    private let library = SHLibrary.default
     
-    init(playlistDataManager: PlaylistDataManager, container: DIContainer) {
-        self.playlistDataManager = playlistDataManager
+    init(container: DIContainer) {
         self.container = container
-//        self.pathModel = pathModel
-        //        bindSearchTerm() // 검색 시간
-        //        Task { _ = await service.requestAuthorization() } // 권한 요청
     }
     
     func requestAuthorization() async -> MusicAuthorization.Status {
-        let result = await musicManager.requestAuthorization()
+        let result = await container.managers.musicManager.requestAuthorization()
         
         // TODO: 권한에 따른 화면 처리
         switch result {
@@ -82,77 +75,94 @@ final class ShazamViewModel: ObservableObject {
         return result
     }
     
-    func prepare() async {
-        await shManagedSession.prepare()
+    func isListening() -> Bool {
+        container.managers.shazamManager.getListeningStatus()
     }
     
     func start() {
-        startShazam(shouldTriggerNavigation: true)
-    }
-    
-    func startShazamForRetry() {
-        startShazam(shouldTriggerNavigation: false)
-    }
-    
-    private func startShazam(shouldTriggerNavigation: Bool) {
-        guard isListening == false else { return }
-        isListening = true
-        currentItem = nil
-        errorDescription = nil
-        status = .loading
-        
-        
-        if shouldTriggerNavigation {
-            pathModel.append(.loading)
-        }
-        
-        Task { [weak self] in
-            guard let self else { return }
-            let result = await self.shManagedSession.result()
-            await self.handle(result)
-        }
+        let result = container.managers.shazamManager.startShazam()
+        self.result = result
     }
     
     func retry() {
-        startShazamForRetry()
+        start()
+        container.pathModel.paths.removeLast()
+        container.pathModel.paths.append(.loading)
     }
     
-    func cancel() {
-        shManagedSession.cancel()
-        isListening = false
-        status = .search
-    }
+//    func prepare() async {
+//        await shManagedSession.prepare()
+//    }
     
-    private func handle(_ result: SHSession.Result) async {
-        shManagedSession.cancel()
-        isListening = false
-        
-        switch result {
-        case .match(let match):
-            if let item = match.mediaItems.first {
-                currentItem = item
-                status = .completed
-                
-                let route = MusicSearchResult(
-                    title: item.title ?? "",
-                    artist: item.artist ?? "",
-                    artworkURL: item.artworkURL,
-                    mediaItem: item,
-                    showsRetryButton: true
-                )
-                pathModel.append(.result(route))
-                //                navigationRoute = .result(route)
-            } else {
-                currentItem = nil
-            }
-        case .noMatch:
-            currentItem = nil
-            
-        case .error(let error, _):
-            errorDescription = error.localizedDescription
-            currentItem = nil
-        }
-    }
+//    func start() {
+//        startShazam(shouldTriggerNavigation: true)
+//    }
+//    
+//    func startShazamForRetry() {
+//        startShazam(shouldTriggerNavigation: false)
+//    }
+//    
+//    private func startShazam(shouldTriggerNavigation: Bool) {
+//        guard isListening == false else { return }
+//        isListening = true
+//        currentItem = nil
+//        errorDescription = nil
+//        status = .loading
+//        
+//        
+//        if shouldTriggerNavigation {
+//            container.pathModel.append(.loading)
+////            pathModel.append(.loading)
+//        }
+//        
+//        Task { [weak self] in
+//            guard let self else { return }
+//            let result = await self.shManagedSession.result()
+//            await self.handle(result)
+//        }
+//    }
+//    
+//    func retry() {
+//        startShazamForRetry()
+//    }
+//    
+//    func cancel() {
+//        shManagedSession.cancel()
+//        isListening = false
+//        status = .search
+//    }
+//    
+//    private func handle(_ result: SHSession.Result) async {
+//        shManagedSession.cancel()
+//        isListening = false
+//        
+//        switch result {
+//        case .match(let match):
+//            if let item = match.mediaItems.first {
+//                currentItem = item
+//                status = .completed
+//                
+//                let route = MusicSearchResult(
+//                    title: item.title ?? "",
+//                    artist: item.artist ?? "",
+//                    artworkURL: item.artworkURL,
+//                    mediaItem: item,
+//                    showsRetryButton: true
+//                )
+//                
+//                container.pathModel.append(.result(route))
+//                //                navigationRoute = .result(route)
+//            } else {
+//                currentItem = nil
+//            }
+//        case .noMatch:
+//            currentItem = nil
+//            
+//        case .error(let error, _):
+//            errorDescription = error.localizedDescription
+//            currentItem = nil
+//        }
+//    }
     
     func handleMusicSelection(song: Music) {
         let properties: [SHMediaItemProperty: Any] = [
@@ -169,7 +179,8 @@ final class ShazamViewModel: ObservableObject {
             mediaItem: mediaItem,
             showsRetryButton: false
         )
-        pathModel.append(.result(item))
+        self.destination = .result(item)
+        container.pathModel.append(.result(item))
         //        navigationRoute = .result(route)
     }
     
@@ -215,7 +226,7 @@ final class ShazamViewModel: ObservableObject {
             results = []
         } else {
             do {
-                let searchResults = try await musicManager.searchSongs(
+                let searchResults = try await container.managers.musicManager.searchSongs(
                     term: term,
                     limit: 25
                 )
@@ -240,10 +251,11 @@ final class ShazamViewModel: ObservableObject {
             karaokeNumber: fetchedKaraokeNumber ?? "없음"
         )
         
-        playlistDataManager.playlists.append(newPlaylistSong)
+        container.managers.playlistDataManager.addMusic(newPlaylistSong)
+//        container.managers.playlistDataManager.playlists.append(newPlaylistSong)
         
         print("Playlist에 추가됨: \(newPlaylistSong.originalSong.title) - 노래방 번호: \(newPlaylistSong.karaokeNumber ?? "없음")")
-        print("PlayList: \(playlistDataManager.playlists)")
+//        print("PlayList: \(playlistDataManager.playlists)")
     }
     
     @MainActor
@@ -254,5 +266,13 @@ final class ShazamViewModel: ObservableObject {
             print("노래방 번호 가져오기 실패: \(error.localizedDescription)")
             return nil
         }
+    }
+    
+    func goToPlaylist() {
+        container.pathModel.removeAll()
+    }
+    
+    func goToBack() {
+        container.pathModel.pop()
     }
 }
