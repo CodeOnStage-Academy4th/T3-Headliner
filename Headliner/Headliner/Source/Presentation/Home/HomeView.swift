@@ -29,7 +29,7 @@ struct HomeView: View {
         }
         .environmentObject(container)
         .overlay(alignment: .bottom) {
-            if !isKeyboardVisible {
+            if !isKeyboardVisible && container.pathModel.paths.isEmpty {
                 CustomTabBar(
                     isScrolled: isScrolled,
                     showsSearchBar: true,

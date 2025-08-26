@@ -80,8 +80,19 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func start() {
-        let result = container.managers.shazamManager.startShazam()
-        self.result = result
+        print("ShazamVM - start()")
+        container.managers.shazamManager.isPossibleShazam()
+        let status = container.managers.shazamManager.getListeningStatus()
+        
+        switch status {
+        case true:
+            container.pathModel.paths.append(.loading)
+            let result = container.managers.shazamManager.startShazam()
+            self.result = result
+        case false:
+            print("않되")
+            return
+        }
     }
     
     func retry() {

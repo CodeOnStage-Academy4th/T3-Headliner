@@ -11,6 +11,7 @@ protocol ShazamManagerType {
     func getListeningStatus() -> Bool
     func prepare() async
     func startShazam() -> MusicSearchResult?
+    func isPossibleShazam() -> Bool?
     func cancel() -> ShazamStatus
 }
 
@@ -38,9 +39,17 @@ extension ShazamManager {
 //        startShazam(shouldTriggerNavigation: false)
 //    }
     
-    func startShazam() -> MusicSearchResult? {
-        guard isListening == false else { return nil }
+    
+    func isPossibleShazam() -> Bool? {
+        guard isListening == false else { return false }
         isListening = true
+        
+        return true
+    }
+    
+    func startShazam() -> MusicSearchResult? {
+        print("ShazamManager startShazam")
+        
 //        currentItem = nil
 //        errorDescription = nil
         status = .loading
