@@ -81,7 +81,7 @@ struct MainListView: View {
     }
     
     private var backgroundView: some View {
-        LinearGradient.backgroundGradient
+        LinearGradient.backgroundGradient.ignoresSafeArea(.all)
     }
     
     @ViewBuilder
