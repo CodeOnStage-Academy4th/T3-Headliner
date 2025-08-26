@@ -2,21 +2,18 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var container: DIContainer
-    @State var playlistDataManager = PlaylistDataManager()
-    //    @State private var shazamViewModel = ShazamViewModel()
     
+    @State var playlistDataManager = PlaylistDataManager()
     @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
     @State private var isKeyboardVisible: Bool = false
-    //    @EnvironmentObject var pathModel: PathModel
     
     private var shouldShowSearchBackground: Bool {
         activeTab == .search
     }
     
     var body: some View {
-        //        NavigationStack(path: $container.pathModel.paths){
         Group {
             if activeTab == .main {
                 MainListView(
@@ -26,7 +23,6 @@ struct HomeView: View {
                 )
                 .background(Color.clear)
             } else {
-                //                    ShazamSearchView(viewModel: shazamViewModel)
                 ShazamSearchView(viewModel: .init(container: container))
                     .background(Color.clear)
             }
@@ -48,14 +44,6 @@ struct HomeView: View {
                 .background(.clear)
             }
         }
-        
-        //            .background {
-        //                backgroundView
-        //                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-        //                    .ignoresSafeArea()
-        //            }
-        //        }
-        //        .environmentObject(viewModel)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             isKeyboardVisible = true
         }

@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-//@Observable
 class PlaylistViewModel: ObservableObject {
     var container: DIContainer
     
