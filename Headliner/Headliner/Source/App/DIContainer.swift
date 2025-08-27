@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import SwiftData
 
 //@MainActor
 //@Observable
 class DIContainer: ObservableObject {
     var managers: ManagerType
     var pathModel: PathModel
+    var modelContext: ModelContext?
     
     init(
         managers: ManagerType,
@@ -21,6 +23,10 @@ class DIContainer: ObservableObject {
         self.pathModel = pathModel
  
         self.pathModel.setObjectWillChange(objectWillChange)
+    }
+    
+    func setModelContext(_ context: ModelContext) {
+        self.modelContext = context
     }
 }
 

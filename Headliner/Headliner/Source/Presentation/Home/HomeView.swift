@@ -1,9 +1,10 @@
 import SwiftUI
 
 struct HomeView: View {
+    @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var container: DIContainer
     
-    @State var playlistDataManager = PlaylistDataManager()
+//    @State var playlistDataManager = PlaylistDataManager()
     @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
@@ -28,6 +29,9 @@ struct HomeView: View {
             }
         }
         .environmentObject(container)
+        .onAppear {
+            container.setModelContext(modelContext)
+        }
         .overlay(alignment: .bottom) {
             if !isKeyboardVisible && container.pathModel.paths.isEmpty {
                 CustomTabBar(

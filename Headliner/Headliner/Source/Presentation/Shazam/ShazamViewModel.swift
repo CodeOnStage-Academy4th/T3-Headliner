@@ -9,6 +9,7 @@ import Foundation
 import ShazamKit
 import Combine
 import MusicKit
+import SwiftData
 
 
 @MainActor
@@ -38,9 +39,8 @@ final class ShazamViewModel: ObservableObject {
             handleQueryChange(newQuery: query)
         }
     }
-    @Published var results: [Music] = []
+    @Published var results: [Song] = []
 //        private(set) var playList: [PlaylistMusic] = []
-    private var playListIDs = Set<String>()
     
     //    var title: String { currentItem?.title ?? "" }
     //    var artist: String { currentItem?.artist ?? "" }
@@ -175,7 +175,7 @@ final class ShazamViewModel: ObservableObject {
 //        }
 //    }
     
-    func handleMusicSelection(song: Music) {
+    func handleMusicSelection(song: Song) {
         let properties: [SHMediaItemProperty: Any] = [
             .title: song.title,
             .artist: song.artistName,
@@ -248,8 +248,25 @@ final class ShazamViewModel: ObservableObject {
     }
     
     @MainActor
-    func addMusic(song: Music) async {
-        guard playListIDs.insert(song.id).inserted else { return }
+    func addSong(song: Song, context: ModelContext) async {
+        let songTitle = song.title
+        let songArtist = song.artistName
+        let descriptor = FetchDescriptor<PlaylistMusic>(
+            predicate: #Predicate {
+                $0.originalSong.title == songTitle && $0.originalSong.artistName == songArtist
+            }
+        )
+        
+        do {
+            let existing = try context.fetch(descriptor)
+            guard existing.isEmpty else {
+                print("@Log - 노래가 플레이리스트에 이미 존재")
+                return
+            }
+        } catch {
+            print("@Log - \(error)")
+            return
+        }
         
         let fetchedKaraokeNumber = await getKaraokeNumber(
             title: song.title,
@@ -257,16 +274,13 @@ final class ShazamViewModel: ObservableObject {
         )
         
         let newPlaylistSong = PlaylistMusic(
-            id: song.id,
             originalSong: song,
             karaokeNumber: fetchedKaraokeNumber ?? "없음"
         )
         
-        container.managers.playlistDataManager.addMusic(newPlaylistSong)
-//        container.managers.playlistDataManager.playlists.append(newPlaylistSong)
+        context.insert(newPlaylistSong)
         
         print("Playlist에 추가됨: \(newPlaylistSong.originalSong.title) - 노래방 번호: \(newPlaylistSong.karaokeNumber ?? "없음")")
-//        print("PlayList: \(playlistDataManager.playlists)")
     }
     
     @MainActor
