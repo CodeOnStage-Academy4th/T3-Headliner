@@ -56,6 +56,7 @@ struct MusicRowView: View {
                 }
             }
             .background(Color.clear)
+            .contentShape(Rectangle())
             .padding(.horizontal, 25)
             .padding(.vertical, 10)
             .clipShape(RoundedRectangle(cornerRadius: 12))

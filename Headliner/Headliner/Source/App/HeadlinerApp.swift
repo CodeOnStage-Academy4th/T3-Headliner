@@ -9,10 +9,14 @@ import SwiftUI
 
 @main
 struct HeadlinerApp: App {
+    
+    @StateObject var container = DIContainer(managers: Managers())
+    
     var body: some Scene {
         WindowGroup {
             HomeView()
-                .environmentObject(PathModel())
+//                .environmentObject(PathModel())
+                .environmentObject(container)
         }
     }
 }

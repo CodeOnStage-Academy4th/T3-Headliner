@@ -3,81 +3,107 @@ import ShazamKit
 import MusicKit
 
 struct ShazamSearchView: View {
-    @EnvironmentObject var pathModel: PathModel
-    @EnvironmentObject private var viewModel: ShazamViewModel
+    @EnvironmentObject var container: DIContainer
+    @State var viewModel: ShazamViewModel
     
     var body: some View {
-        ZStack {
-            VStack(spacing: 0) {
-                // 상단 고정 SearchBar
-                SearchBarView(text: $viewModel.query)
-                    .padding(.horizontal, 25)
-                    .padding(.top, 16)
-                    .padding(.bottom, 8)
-                
-                // 스크롤 가능한 컨텐츠 영역
-                if !viewModel.query.isEmpty {
-                    ScrollView {
-                        LazyVStack(spacing: 0) {
-                            ForEach(viewModel.results) { song in
-                                Button {
-                                    viewModel.handleMusicSelection(song: song)
-                                } label: {
-                                    MusicRowView(
-                                        title: song.title,
-                                        artistName: song.artistName,
-                                        artworkURL: song.artworkURL,
-                                        previewURL: song.previewURL,
-                                        karaokeNumber: nil
-                                    )
+        NavigationStack(path: $container.pathModel.paths){
+            ZStack {
+                VStack(spacing: 0) {
+                    // 상단 고정 SearchBar
+                    SearchBarView(text: $viewModel.query)
+                        .padding(.horizontal, 25)
+                        .padding(.top, 16)
+                        .padding(.bottom, 8)
+                    
+                    // 스크롤 가능한 컨텐츠 영역
+                    if !viewModel.query.isEmpty {
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(viewModel.results) { song in
+                                    Button {
+                                        print("touched song: \(song)")
+                                        viewModel.handleMusicSelection(song: song)
+                                    } label: {
+                                        MusicRowView(
+                                            title: song.title,
+                                            artistName: song.artistName,
+                                            artworkURL: song.artworkURL,
+                                            previewURL: song.previewURL,
+                                            karaokeNumber: nil
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
-                } else {
-                    VStack {
-                        Spacer(minLength: 10) // 최소 여백 보장
-                        
-                        VStack(spacing: 24) {
-                            shazamButton
-                            Text("Sing Cue 하려면 탭하세요")
-                                .font(.pretendardBold20)
-                                .foregroundStyle(.white.opacity(0.6))
+                    } else {
+                        VStack {
+                            Spacer(minLength: 10) // 최소 여백 보장
+                            
+                            VStack(spacing: 24) {
+                                shazamButton
+                                Text("Sing Cue 하려면 탭하세요")
+                                    .font(.pretendardBold20)
+                                    .foregroundStyle(.white.opacity(0.6))
+                            }
+                            
+                            Spacer()
+                            Spacer()
                         }
-                        
-                        Spacer()
-                        Spacer()
                     }
                 }
             }
-        }
-        .background {
-            LinearGradient.backgroundGradient
-                .ignoresSafeArea(.all)
+            .navigationDestination(for: PathType.self) { type in
+                switch type {
+                case .loading:
+                    ShazamLoadingView()
+                case .result(let item):
+                    if let mediaItem = item.mediaItem {
+                        
+                        MediaItemView(
+                            viewModel: viewModel,
+                            mediaItem: mediaItem,
+                            showsRetryButton: item.showsRetryButton
+                        )
+                    }
+                }
+            }
+            .background {
+                backgroundView
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+            }
+            
+            
         }
         .task {
-            await viewModel.prepare()
+            await container.managers.shazamManager.prepare()
         }
-        .onChange(of: viewModel.navigationRoute) { _, route in
-            if let route = route {
-                pathModel.paths.append(route)
-            }
-        }
+        //        .onChange(of: viewModel.navigationRoute) { _, route in
+        //            if let route = route {
+        //                pathModel.paths.append(route)
+        //            }
+        //        }
     }
     
     private var shazamButton: some View {
         Button{
-            if !viewModel.isListening {
+            if !viewModel.isListening() {
                 viewModel.start()
             }
         } label: {
             Image(.shazamButton)
                 .resizable()
                 .frame(width: 220, height: 220)
-                .symbolEffect(.pulse, isActive: viewModel.isListening)
-                .foregroundColor(viewModel.isListening ? .orange : .blue)
+                .symbolEffect(.pulse, isActive: viewModel.isListening())
+                .foregroundColor(viewModel.isListening() ? .orange : .blue)
         }
-        .disabled(viewModel.isListening)
+        .disabled(viewModel.isListening())
+    }
+    
+    
+    private var backgroundView: some View {
+        LinearGradient.backgroundGradient
     }
 }
 

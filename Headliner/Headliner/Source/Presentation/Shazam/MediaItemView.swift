@@ -10,24 +10,27 @@ import ShazamKit
 
 struct MediaItemView: View {
     // MARK: - Properties
-
-    @EnvironmentObject var pathModel: PathModel
-    @EnvironmentObject var viewModel: ShazamViewModel
+    
+    @EnvironmentObject var container: DIContainer
+    var viewModel: ShazamViewModel
     let mediaItem: SHMediaItem
     let showsRetryButton: Bool
-
+    // closure
+    //    var onRetry: (() -> Void)
+    //    var onAddMusic: ((Music) async -> Void)
+    
     // MARK: - Body
-
+    
     var body: some View {
         ZStack {
             // 메인 컨텐츠 레이아웃
             VStack(spacing: 16) {
                 mediaItemArtwork
                 titleAndArtist
-
+                
                 MediaItemButtonsView(
                     showsRetryButton: showsRetryButton,
-                    onRetry: handleRetry,
+                    onRetry: viewModel.retry,
                     onAdd: handleAdd
                 )
             }
@@ -40,10 +43,23 @@ struct MediaItemView: View {
                 .scaledToFill()
                 .ignoresSafeArea()
         )
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    print("goToBack()")
+                    viewModel.goToBack()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 20, weight: .medium))
+                }
+            }
+        }
     }
-
+    
     // MARK: - UI Components
-
+    
     @ViewBuilder
     private var mediaItemArtwork: some View {
         if let url = mediaItem.artworkURL {
@@ -62,7 +78,7 @@ struct MediaItemView: View {
                 .frame(width: 280, height: 280)
         }
     }
-
+    
     private var titleAndArtist: some View {
         VStack(spacing: 6) {
             Text(mediaItem.title ?? "Unknown track")
@@ -76,20 +92,26 @@ struct MediaItemView: View {
         }
         .padding(.bottom, 40)
     }
-
+    
     // MARK: - Actions
-
-    private func handleRetry() {
-        pathModel.paths.removeLast()
-        pathModel.paths.append(.loading)
-        viewModel.retry()
-    }
-
+    
+    //    private func handleRetry() {
+    ////        container.pathModel.paths.removeLast()
+    ////        container.pathModel.paths.append(.loading)
+    //        viewModel.retry()
+    ////TODO: retry
+    //    }
+    
     private func handleAdd() {
         Task {
             let music = mediaItem.toMusic()
             await viewModel.addMusic(song: music)
-            pathModel.paths.removeAll()
+            //            await onAddMusic(music) // 클로저 실행
+//            container.pathModel.removeAll()
+//            viewModel.goToPlaylist()
+            // TODO: addMusic
+            
+            //            _ = container.managers.shazamManager.
         }
     }
 }

@@ -1,0 +1,30 @@
+//
+//  PlaylistViewModel.swift
+//  Headliner
+//
+//  Created by Soop on 8/20/25.
+//
+
+import SwiftUI
+
+class PlaylistViewModel: ObservableObject {
+    var container: DIContainer
+    
+    init(
+        container: DIContainer
+    ) {
+        self.container = container
+    }
+}
+
+extension PlaylistViewModel {
+    /// 플레이리스트가 비어있는지 확인
+    func isEmptyPlaylist() -> Bool {
+        container.managers.playlistDataManager.isEmpty()
+    }
+    
+    /// 플레이리스트 전체 목록 조회
+    func getPlaylist() -> [PlaylistMusic] {
+        container.managers.playlistDataManager.getPlaylists()
+    }
+}
