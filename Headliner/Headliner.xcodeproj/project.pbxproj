@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		21C1D9782E52CD7400EE3A98 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 21C1D9772E52CD7400EE3A98 /* SwiftSoup */; };
 		6C7937042E461D30001083DF /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7937032E461D30001083DF /* CombineMoya */; };
 		6C7937062E461D30001083DF /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7937052E461D30001083DF /* Moya */; };
 		6C7937082E461D30001083DF /* ReactiveMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7937072E461D30001083DF /* ReactiveMoya */; };
@@ -48,7 +49,7 @@
 				6C7937042E461D30001083DF /* CombineMoya in Frameworks */,
 				6C79370A2E461D30001083DF /* RxMoya in Frameworks */,
 				6C7937082E461D30001083DF /* ReactiveMoya in Frameworks */,
-				BAC16E5C2E54651D00D2AB63 /* SwiftSoup in Frameworks */,
+				21C1D9782E52CD7400EE3A98 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,7 +96,7 @@
 				6C7937052E461D30001083DF /* Moya */,
 				6C7937072E461D30001083DF /* ReactiveMoya */,
 				6C7937092E461D30001083DF /* RxMoya */,
-				BAC16E5B2E54651D00D2AB63 /* SwiftSoup */,
+				21C1D9772E52CD7400EE3A98 /* SwiftSoup */,
 			);
 			productName = Headliner;
 			productReference = 6C7936DA2E461A1A001083DF /* Headliner.app */;
@@ -127,7 +128,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6C7937022E461D30001083DF /* XCRemoteSwiftPackageReference "Moya" */,
-				BAC16E5A2E54651D00D2AB63 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				21C1D9762E52CD7400EE3A98 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6C7936DB2E461A1A001083DF /* Products */;
@@ -365,6 +366,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		21C1D9762E52CD7400EE3A98 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.3;
+			};
+		};
 		6C7937022E461D30001083DF /* XCRemoteSwiftPackageReference "Moya" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Moya/Moya";
@@ -384,6 +393,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		21C1D9772E52CD7400EE3A98 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 21C1D9762E52CD7400EE3A98 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
 		6C7937032E461D30001083DF /* CombineMoya */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6C7937022E461D30001083DF /* XCRemoteSwiftPackageReference "Moya" */;
