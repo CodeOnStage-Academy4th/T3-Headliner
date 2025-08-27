@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainListView: View {
     
     var viewModel: PlaylistViewModel
+    @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
     
     let viewTitle: String = "나의 뮤직 리스트"
     @Binding var isScrolled: Bool
@@ -18,7 +20,7 @@ struct MainListView: View {
     var body: some View {
         ZStack {
             backgroundView
-            if viewModel.isEmptyPlaylist() {
+            if playlists.isEmpty {
                 MusicListEmptyView()
             } else {
                 VStack(alignment: .leading, spacing: 0) {
@@ -68,12 +70,15 @@ struct MainListView: View {
                     }
                 )
             LazyVStack(spacing: 0) {
-                ForEach(viewModel.getPlaylist()) { t in
+                ForEach(playlists) { t in
                     MusicRowView(title: t.originalSong.title,
                                  artistName: t.originalSong.artistName,
                                  artworkURL: t.originalSong.artworkURL,
                                  previewURL: t.originalSong.previewURL,
                                  karaokeNumber: t.karaokeNumber)
+                }
+                .onDelete { indexSet in
+                    viewModel.deleteItems(at: indexSet, from: playlists)
                 }
             }
         }
