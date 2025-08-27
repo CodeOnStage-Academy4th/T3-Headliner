@@ -11,6 +11,7 @@ import ShazamKit
 struct MediaItemView: View {
     // MARK: - Properties
     
+    @Environment(\.modelContext) private var context
     @EnvironmentObject var container: DIContainer
     var viewModel: ShazamViewModel
     let mediaItem: SHMediaItem
@@ -104,8 +105,8 @@ struct MediaItemView: View {
     
     private func handleAdd() {
         Task {
-            let music = mediaItem.toMusic()
-            await viewModel.addMusic(song: music)
+            let song = mediaItem.toSong()
+            await viewModel.addSong(song: song, context: context)
             //            await onAddMusic(music) // 클로저 실행
 //            container.pathModel.removeAll()
 //            viewModel.goToPlaylist()
@@ -119,9 +120,9 @@ struct MediaItemView: View {
 // MARK: - Extension
 
 extension SHMediaItem {
-    /// SHMediaItem을 로컬 Music 모델로 변환
-    func toMusic() -> Music {
-        Music(
+    /// SHMediaItem을 로컬 Song 모델로 변환
+    func toSong() -> Song {
+        Song(
             id: self.shazamID ?? UUID().uuidString,
             title: self.title ?? "제목 없음",
             artistName: self.artist ?? "아티스트 없음",

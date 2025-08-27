@@ -10,7 +10,7 @@ import MusicKit
 
 protocol MusicManagerType {
     func requestAuthorization() async -> MusicAuthorization.Status
-    func searchSongs(term: String, limit: Int) async throws -> [Music]
+    func searchSongs(term: String, limit: Int) async throws -> [Song]
 }
 
 final class MusicManager: MusicManagerType {
@@ -23,7 +23,7 @@ final class MusicManager: MusicManagerType {
         await MusicAuthorization.request()
     }
 
-    func searchSongs(term: String, limit: Int = 10) async throws -> [Music] {
+    func searchSongs(term: String, limit: Int = 10) async throws -> [Song] {
         // 토큰 유효성 체크
         guard developerToken.isEmpty == false else {
             throw URLError(.userAuthenticationRequired)
@@ -51,7 +51,7 @@ final class MusicManager: MusicManagerType {
         let decoded = try JSONDecoder().decode(AppleMusicSearchResponse.self, from: data)
         let items = decoded.results.songs?.data ?? []
 
-        let mapped: [Music] = items.compactMap { item in
+        let mapped: [Song] = items.compactMap { item in
             let artString = item.attributes.artwork?.url.replacingOccurrences(of: "{w}x{h}", with: "200x200")
             let artworkURL = artString.flatMap { URL(string: $0) }
 
@@ -62,7 +62,7 @@ final class MusicManager: MusicManagerType {
                 previewURL = nil
             }
 
-            return Music(
+            return Song(
                 id: item.id,
                 title: item.attributes.name,
                 artistName: item.attributes.artistName,
