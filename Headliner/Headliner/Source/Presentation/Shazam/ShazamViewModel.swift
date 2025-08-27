@@ -249,9 +249,12 @@ final class ShazamViewModel: ObservableObject {
     
     @MainActor
     func addSong(song: Song, context: ModelContext) async {
-        let songID = song.id
+        let songTitle = song.title
+        let songArtist = song.artistName
         let descriptor = FetchDescriptor<PlaylistMusic>(
-            predicate: #Predicate { $0.originalSong.id == songID }
+            predicate: #Predicate {
+                $0.originalSong.title == songTitle && $0.originalSong.artistName == songArtist
+            }
         )
         
         do {
