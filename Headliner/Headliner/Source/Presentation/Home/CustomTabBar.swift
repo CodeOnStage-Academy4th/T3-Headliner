@@ -28,11 +28,10 @@ enum TabItem: String, CaseIterable {
 
 struct CustomTabBar: View {
     
-    var isScrolled: Bool
+    @Binding var isScrolled: Bool
     var showsSearchBar: Bool = false
     @Binding var activeTab: TabItem
-    var onSearchBarExpanded: (Bool) -> ()
-    var onSearchTextChanged: (String) -> ()
+    
     /// View Properties
     @GestureState private var isActive: Bool = false
     @State private var isInitialOffsetSet: Bool = false
@@ -66,7 +65,7 @@ struct CustomTabBar: View {
                                 
                                 
                                 Capsule(style: .continuous)
-                                    
+                                
                                     .fill(Color.white.opacity(0.2))
                                     .strokeBorder(.white.opacity(0.2), lineWidth: 1)
                                     .opacity(isScrolled ? 0 : 1)
@@ -97,12 +96,12 @@ struct CustomTabBar: View {
             
         }
         .frame(height: 56)
+        
         /// Animations (Custom)
         .animation(.bouncy, value: dragOffset)
         .animation(.bouncy, value: isActive)
         .animation(.bouncy, value: activeTab)
-        // TODO: effect
-//        .scaleEffect(isScrolled ? 0.8 : 1.0)
+//        .animation(.default, value: isScrolled)
     }
     
     /// Tab Item View
@@ -161,16 +160,9 @@ struct CustomTabBar: View {
     private func TabBarBackground() -> some View {
         if !isScrolled {
             ZStack {
-//                Capsule(style: .continuous)
-//                    .stroke(.gray.opacity(0.25), lineWidth: 0.25)
-                
                 Capsule(style: .continuous)
                     .fill(Color(hex: "FF00FA").opacity(0.75))
                     .strokeBorder(Color(hex: "FF00FA").opacity(0.4))
-//
-//                Capsule(style: .continuous)
-//                    .fill(.ultraThinMaterial)
-                
             }
         } else {
             ZStack {
