@@ -15,6 +15,8 @@ struct MainListView: View {
     @Binding var isScrolled: Bool
     @Binding var scrollOffset: CGFloat
     
+    @State private var scrolledID: Song.ID?
+    
     var viewModel: PlaylistViewModel
     let viewTitle: String = "나의 뮤직 리스트"
     
@@ -39,37 +41,11 @@ struct MainListView: View {
             .foregroundStyle(.white)
             .padding(.top, 40)
             .padding(.horizontal, 25)
-        .padding(.bottom, 20)    }
+            .padding(.bottom, 20)
+    }
     
     var scrollView: some View {
         ScrollView {
-            
-            Rectangle()
-                .fill(Color.clear)
-                .frame(height: 1)
-                .background(
-                    GeometryReader { geo in
-                        Color.clear
-                            .onAppear {
-                                scrollOffset = geo.frame(in: .global).minY
-                                print("Initial scroll offset set: \(scrollOffset)")
-                            }
-                            .onChange(of: geo.frame(in: .global).minY) { oldValue, newValue in
-                                let offset = newValue
-                                print("Current scroll offset: \(offset), Initial: \(scrollOffset)")
-                                
-                                // 초기 위치에서 50포인트 이상 위로 올라갔을 때 (스크롤 다운)
-                                let shouldBeScrolled = offset < scrollOffset - 50
-                                
-                                if shouldBeScrolled != isScrolled {
-                                    print("TabBar scale changing: \(isScrolled) -> \(shouldBeScrolled)")
-                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                        isScrolled = shouldBeScrolled
-                                    }
-                                }
-                            }
-                    }
-                )
 
             LazyVStack(spacing: 0) {
                 ForEach(playlists) { t in
@@ -79,7 +55,20 @@ struct MainListView: View {
                                  previewURL: t.originalSong.previewURL,
                                  karaokeNumber: t.karaokeNumber)
                 }
-                
+            }
+            .scrollTargetLayout()
+        }
+        .scrollPosition(id: $scrolledID)
+        .onChange(of: scrolledID) { oldValue, newValue in
+            if scrolledID != playlists.first?.id {
+                // Soop TODO: - 중복 코드 수정하기
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isScrolled = true
+                }
+            } else {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isScrolled = false
+                }
             }
         }
     }
