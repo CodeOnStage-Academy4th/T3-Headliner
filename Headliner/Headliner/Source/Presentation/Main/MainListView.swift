@@ -46,7 +46,6 @@ struct MainListView: View {
     
     var scrollView: some View {
         ScrollView {
-
             LazyVStack(spacing: 0) {
                 ForEach(playlists) { t in
                     MusicRowView(title: t.originalSong.title,
