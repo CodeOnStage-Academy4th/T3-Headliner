@@ -8,7 +8,8 @@
 import ShazamKit
 
 /// 뮤직 검색 결과
-struct MusicSearchResult: Hashable {
+struct MusicSearchResult: Hashable, Identifiable {
+    let id: String = UUID().uuidString
     let title: String
     let artist: String
     let artworkURL: URL?

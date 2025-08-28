@@ -15,7 +15,7 @@ struct MainListView: View {
     @Binding var isScrolled: Bool
     @Binding var scrollOffset: CGFloat
     
-    @State private var scrolledID: Song.ID?
+    @State private var scrolledID: PlaylistMusic.ID?
     
     var viewModel: PlaylistViewModel
     let viewTitle: String = "나의 뮤직 리스트"

@@ -25,8 +25,11 @@ struct HomeView: View {
                 )
                 .background(Color.clear)
             } else {
-                ShazamSearchView(viewModel: .init(container: container))
-                    .background(Color.clear)
+                ShazamSearchView(
+                    viewModel: .init(container: container),
+                    isScrolled: $isScrolled
+                )
+                .background(Color.clear)
             }
         }
         .environmentObject(container)
@@ -43,9 +46,6 @@ struct HomeView: View {
                 .padding(.horizontal, 25)
                 .padding(.bottom, 30)
                 .background(.clear)
-                .onChange(of: isScrolled) { newValue in
-                            print("HomeView - isScrolled changed:", newValue)
-                        }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in

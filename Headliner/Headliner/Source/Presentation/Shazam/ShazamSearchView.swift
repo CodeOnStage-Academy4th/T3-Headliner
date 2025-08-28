@@ -4,7 +4,11 @@ import MusicKit
 
 struct ShazamSearchView: View {
     @EnvironmentObject var container: DIContainer
+    
     @State var viewModel: ShazamViewModel
+    @State private var scrolledID: MusicSearchResult.ID?
+    
+    @Binding var isScrolled: Bool
     
     var body: some View {
         NavigationStack(path: $container.pathModel.paths){
@@ -62,6 +66,19 @@ struct ShazamSearchView: View {
                             karaokeNumber: nil
                         )
                     }
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollPosition(id: $scrolledID)
+        .onChange(of: scrolledID) { oldValue, newValue in
+            if scrolledID! != viewModel.results.first?.id {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isScrolled = true
+                }
+            } else {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isScrolled = false
                 }
             }
         }
