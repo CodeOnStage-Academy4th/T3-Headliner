@@ -4,18 +4,17 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var container: DIContainer
     
-    @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
     @State private var isKeyboardVisible: Bool = false
     
     private var shouldShowSearchBackground: Bool {
-        activeTab == .search
+        container.activeTab == .search
     }
     
     var body: some View {
         Group {
-            if activeTab == .main {
+            if container.activeTab == .main {
                 MainListView(
                     isScrolled: $isScrolled,
                     scrollOffset: $scrollOffset,
@@ -41,7 +40,7 @@ struct HomeView: View {
                 CustomTabBar(
                     isScrolled: $isScrolled,
                     showsSearchBar: true,
-                    activeTab: $activeTab
+                    activeTab: $container.activeTab
                 )
                 .padding(.horizontal, 25)
                 .padding(.bottom, 30)

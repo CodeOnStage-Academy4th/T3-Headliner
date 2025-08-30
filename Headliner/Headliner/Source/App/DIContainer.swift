@@ -15,6 +15,8 @@ class DIContainer: ObservableObject {
     var pathModel: PathModel
     var modelContext: ModelContext?
     
+    @Published var activeTab : TabItem = .main
+    
     init(
         managers: ManagerType,
         pathModel: PathModel = PathModel()
@@ -24,7 +26,7 @@ class DIContainer: ObservableObject {
  
         self.pathModel.setObjectWillChange(objectWillChange)
     }
-    
+
     func setModelContext(_ context: ModelContext) {
         self.modelContext = context
     }

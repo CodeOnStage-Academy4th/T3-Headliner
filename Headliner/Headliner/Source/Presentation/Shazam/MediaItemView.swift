@@ -107,12 +107,11 @@ struct MediaItemView: View {
         Task {
             let song = mediaItem.toSong()
             await viewModel.addSong(song: song, context: context)
-            //            await onAddMusic(music) // 클로저 실행
-//            container.pathModel.removeAll()
-//            viewModel.goToPlaylist()
-            // TODO: addMusic
             
-            //            _ = container.managers.shazamManager.
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                container.pathModel.removeAll()
+                container.activeTab = .main
+            }
         }
     }
 }
