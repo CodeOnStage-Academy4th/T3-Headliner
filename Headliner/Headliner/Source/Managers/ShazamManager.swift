@@ -6,11 +6,12 @@
 //
 
 import ShazamKit
+import AVFoundation
 
 protocol ShazamManagerType {
     func getListeningStatus() -> Bool
     func prepare() async
-    func startShazam() -> MusicSearchResult?
+    func startShazam() async -> MusicSearchResult?
     func isPossibleShazam() -> Bool?
     func cancel() -> ShazamStatus
 }
@@ -31,15 +32,6 @@ extension ShazamManager {
         await shManagedSession.prepare()
     }
     
-//    func start() {
-//        startShazam()
-//    }
-    
-//    func startShazamForRetry() {
-//        startShazam(shouldTriggerNavigation: false)
-//    }
-    
-    
     func isPossibleShazam() -> Bool? {
         guard isListening == false else { return false }
         isListening = true
@@ -47,40 +39,25 @@ extension ShazamManager {
         return true
     }
     
-    func startShazam() -> MusicSearchResult? {
-        print("ShazamManager startShazam")
-        
-//        currentItem = nil
-//        errorDescription = nil
+    func startShazam() async -> MusicSearchResult? {
+
         status = .loading
         
-        var handledResult: MusicSearchResult? = nil
+        let result = await self.shManagedSession.result()
+        let matchedItem = await self.handle(result)
         
-//        if shouldTriggerNavigation {
-//            container.pathModel.append(.loading)
-//            pathModel.append(.loading)
-//        }
         
-        Task { [weak self] in
-            guard let self else { return }
-            let result = await self.shManagedSession.result()
-            
-            let item = await self.handle(result)
-            handledResult = MusicSearchResult(
-                title: item?.title ?? "",
-                artist: item?.artist ?? "",
-                artworkURL: item?.artworkURL,
-                mediaItem: item,
-                showsRetryButton: true
-            )
-        }
+        let searchResult = MusicSearchResult(
+            title: matchedItem?.title ?? "결과 없음",
+            artist: matchedItem?.artist ?? "",
+            artworkURL: matchedItem?.artworkURL,
+            mediaItem: matchedItem,
+            showsRetryButton: matchedItem == nil
+        )
         
-        return handledResult
+        return searchResult
     }
     
-//    func retry() {
-//        startShazam()
-//    }
     
     func cancel() -> ShazamStatus {
         shManagedSession.cancel()
@@ -92,37 +69,21 @@ extension ShazamManager {
     
     /// Shazam 검색 성공 시 결과 return
     private func handle(_ result: SHSession.Result) async -> SHMatchedMediaItem? {
-        shManagedSession.cancel()
         isListening = false
         
         switch result {
         case .match(let match):
             if let item = match.mediaItems.first {
-//                currentItem = item
                 status = .completed
-                
                 return item
-                
-//                let route = MusicSearchResult(
-//                    title: item.title ?? "",
-//                    artist: item.artist ?? "",
-//                    artworkURL: item.artworkURL,
-//                    mediaItem: item,
-//                    showsRetryButton: true
-//                )
-                
-//                container.pathModel.append(.result(route))
-                //                navigationRoute = .result(route)
             } else {
-//                currentItem = nil
                 return nil
             }
         case .noMatch:
-//            currentItem = nil
+            print("No match found")
             return nil
         case .error(let error, _):
-//            errorDescription = error.localizedDescription
-//            currentItem = nil
+            print("Error: \(error.localizedDescription)")
             return nil
         }
     }

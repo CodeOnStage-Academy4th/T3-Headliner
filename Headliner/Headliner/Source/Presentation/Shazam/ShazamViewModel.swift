@@ -59,18 +59,34 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func start() {
-        print("ShazamVM - start()")
-        container.managers.shazamManager.isPossibleShazam()
-        let status = container.managers.shazamManager.getListeningStatus()
-        
-        switch status {
-        case true:
-            container.pathModel.paths.append(.loading)
-            let result = container.managers.shazamManager.startShazam()
-            self.result = result
-        case false:
-            print("않되")
+        guard container.managers.shazamManager.isPossibleShazam() == true else {
             return
+        }
+        
+        container.pathModel.paths.append(.loading)
+        
+        Task {
+            let result = await container.managers.shazamManager.startShazam()
+            
+            if let result = result, result.mediaItem != nil {
+                self.result = result
+                let destination = PathType.result(result)
+                container.pathModel.paths.removeLast()
+                container.pathModel.paths.append(destination)
+            } else {
+                // 노래를 찾지 못했을 경우
+                let errorResult = MusicSearchResult(
+                    title: "노래를 찾지 못했습니다",
+                    artist: "다시 시도해주세요",
+                    artworkURL: nil,
+                    mediaItem: nil,
+                    showsRetryButton: true
+                )
+                self.result = errorResult
+                let destination = PathType.result(errorResult)
+                container.pathModel.paths.removeLast()
+                container.pathModel.paths.append(destination)
+            }
         }
     }
     
