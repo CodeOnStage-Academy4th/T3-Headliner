@@ -48,7 +48,6 @@ struct MediaItemView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
-                    print("goToBack()")
                     viewModel.goToBack()
                 } label: {
                     Image(systemName: "chevron.left")
@@ -67,12 +66,13 @@ struct MediaItemView: View {
             AsyncImage(url: url) { image in
                 image
                     .resizable()
-                    .scaledToFill()
+                    .scaledToFit()
             } placeholder: {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(.secondary.opacity(0.15))
             }
             .frame(width: 240, height: 240)
+            .clipShape(RoundedRectangle(cornerRadius: 10)) 
         } else {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(.secondary.opacity(0.15))
@@ -91,7 +91,8 @@ struct MediaItemView: View {
                 .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
         }
-        .padding(.bottom, 40)
+        .padding(.top, 10)
+        .padding(.bottom, 20)
     }
     
     // MARK: - Actions
