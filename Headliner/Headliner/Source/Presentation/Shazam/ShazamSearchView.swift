@@ -4,54 +4,25 @@ import MusicKit
 
 struct ShazamSearchView: View {
     @EnvironmentObject var container: DIContainer
+    
     @State var viewModel: ShazamViewModel
+    @State private var scrolledID: MusicSearchResult.ID?
+    
+    @Binding var isScrolled: Bool
     
     var body: some View {
         NavigationStack(path: $container.pathModel.paths){
-            ZStack {
-                VStack(spacing: 0) {
-                    // 상단 고정 SearchBar
-                    SearchBarView(text: $viewModel.query)
-                        .padding(.horizontal, 25)
-                        .padding(.top, 16)
-                        .padding(.bottom, 8)
-                    
-                    // 스크롤 가능한 컨텐츠 영역
-                    if !viewModel.query.isEmpty {
-                        ScrollView {
-                            LazyVStack(spacing: 0) {
-                                ForEach(viewModel.results) { song in
-                                    Button {
-                                        print("touched song: \(song)")
-                                        viewModel.handleMusicSelection(song: song)
-                                    } label: {
-                                        MusicRowView(
-                                            title: song.title,
-                                            artistName: song.artistName,
-                                            artworkURL: song.artworkURL,
-                                            previewURL: song.previewURL,
-                                            karaokeNumber: nil
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        VStack {
-                            Spacer(minLength: 10) // 최소 여백 보장
-                            
-                            VStack(spacing: 24) {
-                                shazamButton
-                                Text("Sing Cue 하려면 탭하세요")
-                                    .font(.pretendardBold20)
-                                    .foregroundStyle(.white.opacity(0.6))
-                            }
-                            
-                            Spacer()
-                            Spacer()
-                        }
-                    }
+            VStack(spacing: 0) {
+                // 상단 고정 SearchBar
+                SearchBarView(text: $viewModel.query)
+                
+                // 스크롤 가능한 컨텐츠 영역
+                if !viewModel.query.isEmpty {
+                    searchResultListView
+                } else {
+                    shazamDefaultView
                 }
+                
             }
             .navigationDestination(for: PathType.self) { type in
                 switch type {
@@ -73,17 +44,59 @@ struct ShazamSearchView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea()
             }
-            
-            
         }
         .task {
             await container.managers.shazamManager.prepare()
         }
-        //        .onChange(of: viewModel.navigationRoute) { _, route in
-        //            if let route = route {
-        //                pathModel.paths.append(route)
-        //            }
-        //        }
+    }
+    
+    private var searchResultListView: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(viewModel.results) { song in
+                    Button {
+                        print("touched song: \(song)")
+                        viewModel.handleMusicSelection(song: song)
+                    } label: {
+                        MusicRowView(
+                            title: song.title,
+                            artistName: song.artistName,
+                            artworkURL: song.artworkURL,
+                            previewURL: song.previewURL,
+                            karaokeNumber: nil
+                        )
+                    }
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollPosition(id: $scrolledID)
+        .onChange(of: scrolledID) { oldValue, newValue in
+            if scrolledID! != viewModel.results.first?.id {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isScrolled = true
+                }
+            } else {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    isScrolled = false
+                }
+            }
+        }
+    }
+    
+    private var shazamDefaultView: some View {
+        VStack {
+            Spacer(minLength: 10) // 최소 여백 보장
+            
+            VStack(spacing: 24) {
+                shazamButton
+                Text("Sing Cue 하려면 탭하세요")
+                    .font(.pretendardBold20)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            
+            Spacer()
+        }
     }
     
     private var shazamButton: some View {
@@ -138,6 +151,9 @@ struct SearchBarView: View {
             RoundedRectangle(cornerRadius: 40).strokeBorder(Color.white.opacity(0.6))
         }
         .padding(.vertical, 12)
+        .padding(.horizontal, 25)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
     }
 }
 

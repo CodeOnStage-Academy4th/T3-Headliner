@@ -4,7 +4,6 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var container: DIContainer
     
-//    @State var playlistDataManager = PlaylistDataManager()
     @State private var activeTab: TabItem = .main
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
@@ -18,14 +17,19 @@ struct HomeView: View {
         Group {
             if activeTab == .main {
                 MainListView(
-                    viewModel: .init(container: container),
                     isScrolled: $isScrolled,
-                    scrollOffset: $scrollOffset
+                    scrollOffset: $scrollOffset,
+                    viewModel: .init(
+                        container: container
+                    )
                 )
                 .background(Color.clear)
             } else {
-                ShazamSearchView(viewModel: .init(container: container))
-                    .background(Color.clear)
+                ShazamSearchView(
+                    viewModel: .init(container: container),
+                    isScrolled: $isScrolled
+                )
+                .background(Color.clear)
             }
         }
         .environmentObject(container)
@@ -35,14 +39,10 @@ struct HomeView: View {
         .overlay(alignment: .bottom) {
             if !isKeyboardVisible && container.pathModel.paths.isEmpty {
                 CustomTabBar(
-                    isScrolled: isScrolled,
+                    isScrolled: $isScrolled,
                     showsSearchBar: true,
                     activeTab: $activeTab
-                ) { isExpanded in
-                    print("Search bar expanded: \(isExpanded)")
-                } onSearchTextChanged: { searchText in
-                    print("Search text: \(searchText)")
-                }
+                )
                 .padding(.horizontal, 25)
                 .padding(.bottom, 30)
                 .background(.clear)
