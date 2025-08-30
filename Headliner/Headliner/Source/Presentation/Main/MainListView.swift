@@ -15,6 +15,9 @@ struct MainListView: View {
     var viewModel: PlaylistViewModel
     let viewTitle: String = "나의 뮤직 리스트"
     
+    @Binding var isScrolled: Bool
+    @State private var scrolledID: PlaylistMusic.ID?
+    
     var body: some View {
         ZStack {
             backgroundView.ignoresSafeArea(.all)
