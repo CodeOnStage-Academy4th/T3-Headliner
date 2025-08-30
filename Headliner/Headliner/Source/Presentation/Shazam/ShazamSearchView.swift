@@ -5,7 +5,7 @@ import MusicKit
 struct ShazamSearchView: View {
     @EnvironmentObject var container: DIContainer
     
-    @State var viewModel: ShazamViewModel
+    @StateObject var viewModel: ShazamViewModel
     @State private var scrolledID: MusicSearchResult.ID?
     
     @Binding var isScrolled: Bool
@@ -122,6 +122,7 @@ struct ShazamSearchView: View {
 
 struct SearchBarView: View {
     @Binding var text: String
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         HStack {
@@ -130,11 +131,15 @@ struct SearchBarView: View {
                 text: $text,
                 prompt: Text("노래를 검색하세요").foregroundStyle(.white.opacity(0.6))
             )
+            .focused($isFocused)
             .textFieldStyle(CustomTextFieldStyle())
             .padding(.leading, 20)
             
             if !text.isEmpty {
-                Button(action: { text = "" }) {
+                Button {
+                    text = ""
+                    isFocused = true
+                } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundColor(.white.opacity(0.6))
                 }

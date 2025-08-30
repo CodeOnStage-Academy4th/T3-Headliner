@@ -18,8 +18,10 @@ final class ShazamViewModel: ObservableObject {
     
     @Published var currentItem: SHMediaItem?
     @Published var result: MusicSearchResult?
+    @Published var karaokeNumberCache: [String: String] = [:]
     @Published var query: String = "" {
         didSet {
+            guard !query.isEmpty else { return }
             handleQueryChange(newQuery: query)
         }
     }
@@ -70,6 +72,9 @@ final class ShazamViewModel: ObservableObject {
             
             if let result = result, result.mediaItem != nil {
                 self.result = result
+
+                prefetchKaraokeNumber(title: result.title, artist: result.artist)
+
                 let destination = PathType.result(result)
                 container.pathModel.paths.removeLast()
                 container.pathModel.paths.append(destination)
@@ -97,6 +102,8 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func handleMusicSelection(song: Song) {
+        prefetchKaraokeNumber(title: song.title, artist: song.artistName)
+
         let properties: [SHMediaItemProperty: Any] = [
             .title: song.title,
             .artist: song.artistName,
@@ -169,11 +176,13 @@ final class ShazamViewModel: ObservableObject {
             print("@Log - \(error)")
             return
         }
-        
-        let fetchedKaraokeNumber = await getKaraokeNumber(
-            title: song.title,
-            singer: song.artistName
-        )
+
+        let fetchedKaraokeNumber: String?
+        if let cached = getCachedKaraokeNumber(title: song.title, artist: song.artistName) {
+            fetchedKaraokeNumber = cached
+        } else {
+            fetchedKaraokeNumber = await getKaraokeNumber(title: song.title, singer: song.artistName)
+        }
         
         let newPlaylistSong = PlaylistMusic(
             originalSong: song,
@@ -192,6 +201,29 @@ final class ShazamViewModel: ObservableObject {
         } catch {
             print("노래방 번호 가져오기 실패: \(error.localizedDescription)")
             return nil
+        }
+    }
+
+    private func getCacheKey(title: String, artist: String) -> String {
+        return "\(title)-\(artist)"
+    }
+
+    func getCachedKaraokeNumber(title: String, artist: String) -> String? {
+        let key = getCacheKey(title: title, artist: artist)
+        return karaokeNumberCache[key]
+    }
+
+    private func prefetchKaraokeNumber(title: String, artist: String) {
+        let key = getCacheKey(title: title, artist: artist)
+
+        guard karaokeNumberCache[key] == nil else { return }
+
+        Task {
+            if let number = await getKaraokeNumber(title: title, singer: artist) {
+                await MainActor.run {
+                    karaokeNumberCache[key] = number
+                }
+            }
         }
     }
     

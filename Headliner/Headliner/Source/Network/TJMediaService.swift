@@ -20,6 +20,7 @@ class TJMediaService {
         let searchTerm = stripQualifiers(stripParenthetical(title))
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: #",\s*[^,]*$"#, with: "", options: .regularExpression)
 
         if searchTerm.isEmpty {
             return nil
@@ -88,7 +89,11 @@ class TJMediaService {
     }()
     
     private func normalizeTitle(_ s: String) -> String {
-        return baseNormalize(stripQualifiers(stripParenthetical(s)))
+        let normalized = stripQualifiers(stripParenthetical(s))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: #",\s*[^,]*$"#, with: "", options: .regularExpression)
+        
+        return baseNormalize(normalized)
     }
     
     private func normalizeArtist(_ s: String) -> String {
