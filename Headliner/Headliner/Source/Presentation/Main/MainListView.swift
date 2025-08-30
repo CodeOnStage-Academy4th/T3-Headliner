@@ -23,15 +23,22 @@ struct MainListView: View {
     var body: some View {
         ZStack {
             backgroundView
+            
             if playlists.isEmpty {
                 MusicListEmptyView()
             } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    titleView
-                    scrollView
-                }
-                bottomDeemedlayer
+                musicListView
             }
+        }
+    }
+    
+    var musicListView: some View {
+        ZStack {
+            VStack(alignment: .leading, spacing: 0) {
+                titleView
+                scrollView
+            }
+            bottomDeemedlayer
         }
     }
     
@@ -90,7 +97,15 @@ struct MainListView: View {
     }
     
     private var backgroundView: some View {
-        LinearGradient.backgroundGradient.ignoresSafeArea(.all)
+        GeometryReader { proxy in
+            Image(.emptyBackground)
+                .resizable()
+                .scaledToFill()
+                .frame(width: proxy.size.width,
+                       height: proxy.size.height)
+                .clipped()
+        }
+        .ignoresSafeArea()
     }
     
     @ViewBuilder

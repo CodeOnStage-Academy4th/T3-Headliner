@@ -8,10 +8,6 @@ struct HomeView: View {
     @State private var isScrolled: Bool = false
     @State private var isKeyboardVisible: Bool = false
     
-    private var shouldShowSearchBackground: Bool {
-        container.activeTab == .search
-    }
-    
     var body: some View {
         Group {
             if container.activeTab == .main {
@@ -22,20 +18,18 @@ struct HomeView: View {
                         container: container
                     )
                 )
-                .background(Color.clear)
             } else {
                 ShazamSearchView(
                     viewModel: .init(container: container),
                     isScrolled: $isScrolled
                 )
-                .background(Color.clear)
             }
         }
         .environmentObject(container)
         .onAppear {
             container.setModelContext(modelContext)
         }
-        .overlay(alignment: .bottom) {
+        .safeAreaInset(edge: .bottom) {
             if !isKeyboardVisible && container.pathModel.paths.isEmpty {
                 CustomTabBar(
                     isScrolled: $isScrolled,
@@ -52,17 +46,6 @@ struct HomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             isKeyboardVisible = false
-        }
-    }
-    
-    @ViewBuilder
-    private var backgroundView: some View {
-        if shouldShowSearchBackground {
-            LinearGradient.backgroundGradient
-        } else {
-            Image("EmptyBackground")
-                .resizable()
-                .scaledToFill()
         }
     }
 }
