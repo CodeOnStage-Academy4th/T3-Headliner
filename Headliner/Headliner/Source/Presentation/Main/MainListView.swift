@@ -11,12 +11,7 @@ import SwiftData
 struct MainListView: View {
     
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
-    
-    @Binding var isScrolled: Bool
-    @Binding var scrollOffset: CGFloat
-    
-    @State private var scrolledID: PlaylistMusic.ID?
-    
+
     var viewModel: PlaylistViewModel
     let viewTitle: String = "나의 뮤직 리스트"
     
@@ -63,7 +58,7 @@ struct MainListView: View {
                                  karaokeNumber: t.karaokeNumber)
                     .swipeActions(edge: .trailing) {
                         Button {
-                            
+                            // TODO: swift data delete action
                         } label: {
                             // TODO: Custom Button으로 수정하기 & 간격
 //                            Image(systemName: "trash")

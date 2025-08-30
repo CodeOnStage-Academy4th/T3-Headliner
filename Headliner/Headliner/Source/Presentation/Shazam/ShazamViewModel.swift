@@ -13,7 +13,6 @@ import SwiftData
 
 
 @MainActor
-//@Observable
 final class ShazamViewModel: ObservableObject {
     
     @Published var currentItem: SHMediaItem?

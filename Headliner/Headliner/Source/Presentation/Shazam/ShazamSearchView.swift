@@ -22,7 +22,7 @@ struct ShazamSearchView: View {
                 } else {
                     shazamDefaultView
                 }
-                
+                    
             }
             .toolbarBackgroundVisibility(.hidden, for: .tabBar)
             .navigationDestination(for: PathType.self) { type in
@@ -42,8 +42,8 @@ struct ShazamSearchView: View {
             }
             .background {
                 backgroundView.ignoresSafeArea(.all)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .ignoresSafeArea()
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    .ignoresSafeArea()
             }
         }
         .task {
@@ -162,4 +162,3 @@ struct SearchBarView: View {
         .padding(.bottom, 8)
     }
 }
-
