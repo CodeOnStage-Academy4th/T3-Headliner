@@ -53,6 +53,23 @@ struct MainListView: View {
                                  artworkURL: t.originalSong.artworkURL,
                                  previewURL: t.originalSong.previewURL,
                                  karaokeNumber: t.karaokeNumber)
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            
+                        } label: {
+                            // TODO: Custom Button으로 수정하기 & 간격
+//                            Image(systemName: "trash")
+//                                .frame(width: 70, height: 70)
+//                                .foregroundStyle(.white.opacity(0.6))
+//                                .background(RoundedRectangle(cornerRadius: 8).fill(Color.blue))
+                            Image(.delete)
+                                .offset(x: 3)
+                            
+                        }
+                        .tint(.clear)
+                        
+                    }
+                    .enableScrollViewSwipeActions()
                 }
             }
             .scrollTargetLayout()
