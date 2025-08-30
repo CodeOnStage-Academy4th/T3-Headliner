@@ -9,27 +9,26 @@ struct HomeView: View {
     @State private var isKeyboardVisible: Bool = false
     
     var body: some View {
-        Group {
-            if container.activeTab == .main {
-                MainListView(
-                    isScrolled: $isScrolled,
-                    scrollOffset: $scrollOffset,
-                    viewModel: .init(
-                        container: container
-                    )
-                )
-            } else {
-                ShazamSearchView(
-                    viewModel: .init(container: container),
-                    isScrolled: $isScrolled
-                )
-            }
+        TabView(selection: $container.activeTab) {
+            MainListView(
+                viewModel: .init(container: container),
+                isScrolled: $isScrolled
+            )
+            .tag(TabItem.main)
+            
+            ShazamSearchView(
+                viewModel: .init(container: container),
+                isScrolled: $isScrolled
+            )
+            .tag(TabItem.search)
+            
         }
+        .tabViewStyle(.automatic)
         .environmentObject(container)
         .onAppear {
             container.setModelContext(modelContext)
         }
-        .safeAreaInset(edge: .bottom) {
+        .overlay(alignment: .bottom) {
             if !isKeyboardVisible && container.pathModel.paths.isEmpty {
                 CustomTabBar(
                     isScrolled: $isScrolled,

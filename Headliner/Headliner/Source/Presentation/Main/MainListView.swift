@@ -22,7 +22,7 @@ struct MainListView: View {
     
     var body: some View {
         ZStack {
-            backgroundView
+            backgroundView.ignoresSafeArea(.all)
             
             if playlists.isEmpty {
                 MusicListEmptyView()
@@ -30,6 +30,7 @@ struct MainListView: View {
                 musicListView
             }
         }
+        .toolbarBackgroundVisibility(.hidden, for: .tabBar)
     }
     
     var musicListView: some View {
