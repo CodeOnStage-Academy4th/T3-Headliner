@@ -5,8 +5,10 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>Pretendard-Bold.otf</string>
-		<string>Pretendard-SemiBold.otf</string>
 		<string>Pretendard-Medium.otf</string>
+		<string>Pretendard-SemiBold.otf</string>
 	</array>
+	<key>appleMusicDeveloperToken</key>
+	<string>eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjlCNDlLOFA5WlQifQ.eyJpYXQiOjE3NTQ2ODcyNzcsImV4cCI6MTc3MDIzOTI3NywiaXNzIjoiVUg4TDQyNDRNQiJ9.EI-5rttxlG-U3bfoGDodUbMauYctYTIpj2iVZwtUh5cR_lNlz2qHhHmCIxcaVG-fSUg1d-G5mMa-0YlJNkN31w</string>
 </dict>
 </plist>
