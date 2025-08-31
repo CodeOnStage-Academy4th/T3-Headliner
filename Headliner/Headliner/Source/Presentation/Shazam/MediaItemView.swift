@@ -16,9 +16,6 @@ struct MediaItemView: View {
     var viewModel: ShazamViewModel
     let mediaItem: SHMediaItem
     let showsRetryButton: Bool
-    // closure
-    //    var onRetry: (() -> Void)
-    //    var onAddMusic: ((Music) async -> Void)
     
     // MARK: - Body
     

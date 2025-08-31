@@ -153,6 +153,7 @@ struct CustomTabBar: View {
                     dragOffset = CGFloat(tab.index) * width
                 }
         )
+        .disabled(isScrolled)
     }
     
     /// Tab Bar Background View

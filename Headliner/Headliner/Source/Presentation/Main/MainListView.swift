@@ -11,27 +11,33 @@ import SwiftData
 struct MainListView: View {
     
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
-    
-    @Binding var isScrolled: Bool
-    @Binding var scrollOffset: CGFloat
-    
-    @State private var scrolledID: PlaylistMusic.ID?
-    
+
     var viewModel: PlaylistViewModel
     let viewTitle: String = "나의 뮤직 리스트"
     
+    @Binding var isScrolled: Bool
+    @State private var scrolledID: PlaylistMusic.ID?
+    
     var body: some View {
         ZStack {
-            backgroundView
+            backgroundView.ignoresSafeArea(.all)
+            
             if playlists.isEmpty {
                 MusicListEmptyView()
             } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    titleView
-                    scrollView
-                }
-                bottomDeemedlayer
+                musicListView
             }
+        }
+        .toolbarBackgroundVisibility(.hidden, for: .tabBar)
+    }
+    
+    var musicListView: some View {
+        ZStack {
+            VStack(alignment: .leading, spacing: 0) {
+                titleView
+                scrollView
+            }
+            bottomDeemedlayer
         }
     }
     
@@ -53,6 +59,23 @@ struct MainListView: View {
                                  artworkURL: t.originalSong.artworkURL,
                                  previewURL: t.originalSong.previewURL,
                                  karaokeNumber: t.karaokeNumber)
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            // TODO: swift data delete action
+                        } label: {
+                            // TODO: Custom Button으로 수정하기 & 간격
+//                            Image(systemName: "trash")
+//                                .frame(width: 70, height: 70)
+//                                .foregroundStyle(.white.opacity(0.6))
+//                                .background(RoundedRectangle(cornerRadius: 8).fill(Color.blue))
+                            Image(.delete)
+                                .offset(x: 3)
+                            
+                        }
+                        .tint(.clear)
+                        
+                    }
+                    .enableScrollViewSwipeActions()
                 }
             }
             .scrollTargetLayout()
@@ -73,7 +96,15 @@ struct MainListView: View {
     }
     
     private var backgroundView: some View {
-        LinearGradient.backgroundGradient.ignoresSafeArea(.all)
+        GeometryReader { proxy in
+            Image(.emptyBackground)
+                .resizable()
+                .scaledToFill()
+                .frame(width: proxy.size.width,
+                       height: proxy.size.height)
+                .clipped()
+        }
+        .ignoresSafeArea()
     }
     
     @ViewBuilder

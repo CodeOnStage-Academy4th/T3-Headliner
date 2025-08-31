@@ -8,29 +8,22 @@ struct HomeView: View {
     @State private var isScrolled: Bool = false
     @State private var isKeyboardVisible: Bool = false
     
-    private var shouldShowSearchBackground: Bool {
-        container.activeTab == .search
-    }
-    
     var body: some View {
-        Group {
-            if container.activeTab == .main {
-                MainListView(
-                    isScrolled: $isScrolled,
-                    scrollOffset: $scrollOffset,
-                    viewModel: .init(
-                        container: container
-                    )
-                )
-                .background(Color.clear)
-            } else {
-                ShazamSearchView(
-                    viewModel: .init(container: container),
-                    isScrolled: $isScrolled
-                )
-                .background(Color.clear)
-            }
+        TabView(selection: $container.activeTab) {
+            MainListView(
+                viewModel: .init(container: container),
+                isScrolled: $isScrolled
+            )
+            .tag(TabItem.main)
+            
+            ShazamSearchView(
+                viewModel: .init(container: container),
+                isScrolled: $isScrolled
+            )
+            .tag(TabItem.search)
+            
         }
+        .tabViewStyle(.automatic)
         .environmentObject(container)
         .onAppear {
             container.setModelContext(modelContext)
@@ -52,17 +45,6 @@ struct HomeView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             isKeyboardVisible = false
-        }
-    }
-    
-    @ViewBuilder
-    private var backgroundView: some View {
-        if shouldShowSearchBackground {
-            LinearGradient.backgroundGradient
-        } else {
-            Image("EmptyBackground")
-                .resizable()
-                .scaledToFill()
         }
     }
 }

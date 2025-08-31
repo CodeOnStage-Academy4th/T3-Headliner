@@ -13,18 +13,18 @@ import SwiftData
 
 
 @MainActor
-//@Observable
 final class ShazamViewModel: ObservableObject {
     
     @Published var currentItem: SHMediaItem?
     @Published var result: MusicSearchResult?
-    @Published var karaokeNumberCache: [String: String] = [:]
     @Published var query: String = "" {
         didSet {
             guard !query.isEmpty else { return }
             handleQueryChange(newQuery: query)
         }
     }
+    
+    @Published var karaokeNumberCache: [String: String] = [:]
     @Published var results: [Song] = []
     
     var container: DIContainer
