@@ -23,12 +23,23 @@ struct ShazamLoadingView: View {
                     .onAppear {
                         loopingPlayer.player.play()
                     }
-                VStack {
+                
+                VStack(spacing: 20) {
                     Image(.shazamButton)
                         .resizable()
                         .frame(width: 220, height: 220)
-                    Spacer()
-                        .frame(height: 70)
+                    
+                    VStack(spacing: 12) {
+                        Text("검색 중")
+                            .font(.pretendardBold20)
+                            .foregroundColor(.white)
+                        
+                        Text("기기에 곡이 제대로 인식되는지 확인하세요")
+                            .font(.pretendardMedium16)
+                            .foregroundColor(.white.opacity(0.8))
+                            .multilineTextAlignment(.center)
+                    }
+                    .offset(y: 100)
                 }
             }
         }
