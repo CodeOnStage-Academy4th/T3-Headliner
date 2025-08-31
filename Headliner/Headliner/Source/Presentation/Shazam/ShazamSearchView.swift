@@ -86,15 +86,14 @@ struct ShazamSearchView: View {
     }
     
     private var shazamDefaultView: some View {
-        VStack {
-            Spacer(minLength: 10) // 최소 여백 보장
-            
+        VStack(alignment: .center, spacing: 0) {
             VStack(spacing: 24) {
                 shazamButton
                 Text("Sing Cue 하려면 탭하세요")
                     .font(.pretendardBold20)
                     .foregroundStyle(.white.opacity(0.6))
             }
+            .padding(.top, 100)
             
             Spacer()
         }
