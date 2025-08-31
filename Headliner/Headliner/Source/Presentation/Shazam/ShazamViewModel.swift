@@ -102,6 +102,9 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func handleMusicSelection(song: Song) {
+
+        container.managers.shazamManager.cancel()
+
         prefetchKaraokeNumber(title: song.title, artist: song.artistName)
 
         let properties: [SHMediaItemProperty: Any] = [
