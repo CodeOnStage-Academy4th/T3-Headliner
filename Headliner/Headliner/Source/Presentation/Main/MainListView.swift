@@ -53,7 +53,9 @@ struct MainListView: View {
     var scrollView: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(playlists) { t in
+                ForEach(playlists, id: \.id) { t in
+                    let index = playlists.firstIndex(where: { $0.id == t.id }) ?? 0
+                    
                     MusicRowView(title: t.originalSong.title,
                                  artistName: t.originalSong.artistName,
                                  artworkURL: t.originalSong.artworkURL,
@@ -61,13 +63,11 @@ struct MainListView: View {
                                  karaokeNumber: t.karaokeNumber)
                     .swipeActions(edge: .trailing) {
                         Button {
-                            // TODO: swift data delete action
+                            viewModel.deleteItems(
+                                at: IndexSet(integer: index),
+                                from: playlists
+                            )
                         } label: {
-                            // TODO: Custom Button으로 수정하기 & 간격
-//                            Image(systemName: "trash")
-//                                .frame(width: 70, height: 70)
-//                                .foregroundStyle(.white.opacity(0.6))
-//                                .background(RoundedRectangle(cornerRadius: 8).fill(Color.blue))
                             Image(.delete)
                                 .offset(x: 3)
                             
