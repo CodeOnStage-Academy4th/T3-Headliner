@@ -12,7 +12,6 @@
 		6C7937062E461D30001083DF /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7937052E461D30001083DF /* Moya */; };
 		6C7937082E461D30001083DF /* ReactiveMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7937072E461D30001083DF /* ReactiveMoya */; };
 		6C79370A2E461D30001083DF /* RxMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 6C7937092E461D30001083DF /* RxMoya */; };
-		BAC16E5C2E54651D00D2AB63 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = BAC16E5B2E54651D00D2AB63 /* SwiftSoup */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,7 +19,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		21F6F3842E46A92900B10F99 /* Exceptions for "Headliner" folder in "Headliner" target */ = {
+		BAA42FB42E646C5200532892 /* Exceptions for "Headliner" folder in "Headliner" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -33,7 +32,7 @@
 		6C7936DC2E461A1A001083DF /* Headliner */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				21F6F3842E46A92900B10F99 /* Exceptions for "Headliner" folder in "Headliner" target */,
+				BAA42FB42E646C5200532892 /* Exceptions for "Headliner" folder in "Headliner" target */,
 			);
 			path = Headliner;
 			sourceTree = "<group>";
@@ -291,6 +290,7 @@
 				DEVELOPMENT_TEAM = UH8L4244MB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Headliner/Info.plist;
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "노래를 검색하고 보관함에 추가하기 위해 Apple Music 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "노래를 검색하고 보관함에 추가하기 위해 Apple Music 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -298,6 +298,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -322,6 +323,7 @@
 				DEVELOPMENT_TEAM = UH8L4244MB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Headliner/Info.plist;
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "노래를 검색하고 보관함에 추가하기 위해 Apple Music 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "노래를 검색하고 보관함에 추가하기 위해 Apple Music 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -329,6 +331,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -382,14 +385,6 @@
 				minimumVersion = 15.0.3;
 			};
 		};
-		BAC16E5A2E54651D00D2AB63 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.10.3;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -417,11 +412,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6C7937022E461D30001083DF /* XCRemoteSwiftPackageReference "Moya" */;
 			productName = RxMoya;
-		};
-		BAC16E5B2E54651D00D2AB63 /* SwiftSoup */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BAC16E5A2E54651D00D2AB63 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
-			productName = SwiftSoup;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
