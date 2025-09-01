@@ -10,6 +10,7 @@ import AVKit
 
 struct ShazamLoadingView: View {
     
+    @ObservedObject var viewModel: ShazamViewModel
     @StateObject private var loopingPlayer = LoopingPlayer(videoName: "background")
     
     var body: some View {
@@ -28,6 +29,7 @@ struct ShazamLoadingView: View {
                     Image(.shazamButton)
                         .resizable()
                         .frame(width: 220, height: 220)
+                        .padding(.top, 60)
                     
                     VStack(spacing: 12) {
                         Text("검색 중")
@@ -38,6 +40,13 @@ struct ShazamLoadingView: View {
                             .font(.pretendardMedium16)
                             .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
+                        
+                        Button {
+                            viewModel.goToBack()
+                        } label: {
+                            Text("취소하기")
+                        }
+                        .buttonStyle(RetryButtonStyle())
                     }
                     .offset(y: 100)
                 }
@@ -48,6 +57,3 @@ struct ShazamLoadingView: View {
     }
 }
 
-#Preview {
-    ShazamLoadingView()
-}

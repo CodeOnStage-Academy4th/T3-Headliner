@@ -28,7 +28,7 @@ struct ShazamSearchView: View {
             .navigationDestination(for: PathType.self) { type in
                 switch type {
                 case .loading:
-                    ShazamLoadingView()
+                    ShazamLoadingView(viewModel: viewModel)
                 case .result(let item):
                     if let mediaItem = item.mediaItem {
                         

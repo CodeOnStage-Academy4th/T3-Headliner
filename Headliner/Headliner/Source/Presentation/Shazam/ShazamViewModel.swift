@@ -33,6 +33,7 @@ final class ShazamViewModel: ObservableObject {
     var errorDescription: String?
 
     private var cancellables = Set<AnyCancellable>()
+    private var shazamTask: Task<Void, Never>?
 
     init(container: DIContainer) {
         self.container = container
@@ -65,16 +66,20 @@ final class ShazamViewModel: ObservableObject {
             return
         }
         
+        // 이전 Task가 있다면 취소
+        shazamTask?.cancel()
+        
         container.pathModel.paths.append(.loading)
         
-        Task {
+        shazamTask = Task {
             let result = await container.managers.shazamManager.startShazam()
+            
+            guard !Task.isCancelled else { return }
             
             if let result = result, result.mediaItem != nil {
                 self.result = result
-
                 prefetchKaraokeNumber(title: result.title, artist: result.artist)
-
+                
                 let destination = PathType.result(result)
                 container.pathModel.paths.removeLast()
                 container.pathModel.paths.append(destination)
@@ -235,6 +240,9 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func goToBack() {
+        shazamTask?.cancel()
+        container.managers.shazamManager.cancel()
         container.pathModel.pop()
     }
+    
 }
