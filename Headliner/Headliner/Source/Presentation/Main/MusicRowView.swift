@@ -13,29 +13,14 @@ struct MusicRowView: View {
     let artworkURL: URL?
     let previewURL: URL?
     let karaokeNumber: String?
-
+    
     var body: some View {
-        ZStack { 
+        ZStack {
             HStack(spacing: 20) {
-                AsyncImage(url: artworkURL) { phase in
-                switch phase {
-                case .success(let image):
-                    image.resizable()
-                         .scaledToFill()
-                case .failure:
-                    Image(systemName: "music.note")
-                        .resizable()
-                        .scaledToFit()
-                        .foregroundStyle(.white.opacity(0.8))
-                case .empty:
-                    ProgressView()
-                @unknown default:
-                    EmptyView()
-                }
-            }
-            .frame(width: 48, height: 48)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            
+                CachedImageView(url: artworkURL)
+                    .frame(width: 48, height: 48)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                
                 VStack(spacing: 0) {
                     HStack {
                         VStack(alignment: .leading, spacing: 8) {
