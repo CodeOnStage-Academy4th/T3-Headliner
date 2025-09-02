@@ -11,7 +11,7 @@ import SwiftData
 struct MainListView: View {
     
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
-
+    
     var viewModel: PlaylistViewModel
     let viewTitle: String = "나의 뮤직 리스트"
     
@@ -29,6 +29,9 @@ struct MainListView: View {
             }
         }
         .toolbarBackgroundVisibility(.hidden, for: .tabBar)
+        .onAppear {
+            isScrolled = false
+        }
     }
     
     var musicListView: some View {
