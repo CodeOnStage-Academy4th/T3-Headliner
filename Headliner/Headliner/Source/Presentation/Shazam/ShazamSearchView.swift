@@ -7,22 +7,22 @@ struct ShazamSearchView: View {
     
     @StateObject var viewModel: ShazamViewModel
     @State private var scrolledID: MusicSearchResult.ID?
+    @State private var scrollPostion: ScrollPosition = .init(idType: MusicSearchResult.ID.self)
     
     @Binding var isScrolled: Bool
     
     var body: some View {
         NavigationStack(path: $container.pathModel.paths){
             VStack(spacing: 0) {
-                // 상단 고정 SearchBar
+                
                 SearchBarView(text: $viewModel.query)
                 
-                // 스크롤 가능한 컨텐츠 영역
                 if !viewModel.query.isEmpty {
                     searchResultListView
                 } else {
                     shazamDefaultView
                 }
-                    
+                
             }
             .toolbarBackgroundVisibility(.hidden, for: .tabBar)
             .navigationDestination(for: PathType.self) { type in
@@ -42,12 +42,20 @@ struct ShazamSearchView: View {
             }
             .background {
                 backgroundView.ignoresSafeArea(.all)
-//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                    .ignoresSafeArea()
             }
         }
         .task {
             await container.managers.shazamManager.prepare()
+        }
+        .onChange(of: viewModel.query) { oldValue, newValue in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isScrolled = false
+            }
+        }
+        .onChange(of: viewModel.results) { oldValue, newValue in
+            if let firstResult = newValue.first {
+                scrolledID = firstResult.id
+            }
         }
     }
     
@@ -56,7 +64,6 @@ struct ShazamSearchView: View {
             LazyVStack(spacing: 0) {
                 ForEach(viewModel.results) { song in
                     Button {
-                        print("touched song: \(song)")
                         viewModel.handleMusicSelection(song: song)
                     } label: {
                         MusicRowView(
@@ -73,7 +80,9 @@ struct ShazamSearchView: View {
         }
         .scrollPosition(id: $scrolledID)
         .onChange(of: scrolledID) { oldValue, newValue in
-            if scrolledID! != viewModel.results.first?.id {
+            guard let id = scrolledID else { return }
+            
+            if id != viewModel.results.first?.id {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isScrolled = true
                 }
