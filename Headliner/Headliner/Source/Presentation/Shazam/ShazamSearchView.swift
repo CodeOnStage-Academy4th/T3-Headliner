@@ -28,13 +28,12 @@ struct ShazamSearchView: View {
                 case .loading:
                     ShazamLoadingView(viewModel: viewModel)
                 case .result(let item):
-                    if let mediaItem = item.mediaItem {
-                        MediaItemView(
-                            viewModel: viewModel,
-                            mediaItem: mediaItem,
-                            showsRetryButton: item.showsRetryButton
-                        )
-                    }
+                    MediaItemView(
+                        viewModel: viewModel,
+                        mediaItem: item.mediaItem,
+                        result: item,
+                        showsRetryButton: item.showsRetryButton
+                    )
                 }
             }
             .background {

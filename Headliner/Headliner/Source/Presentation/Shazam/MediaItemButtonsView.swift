@@ -8,40 +8,68 @@
 import SwiftUI
 
 struct MediaItemButtonsView: View {
-    let showsRetryButton: Bool
+    let resultType: SearchStatusType
     let onRetry: () -> Void
     let onAdd: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
-            Button(action: onAdd) {
-                HStack(spacing: 8) {
-                    Image(systemName: "plus")
-                    Text("추가하기")
-                        .font(.pretendardSemiBold18)
-                }
-            }
-            .buttonStyle(CustomButtonStyle())
-            
-            if showsRetryButton {
-                Button(action: onRetry) {
-                    ZStack {
-                        HStack(spacing: 8) {
-                            Image(systemName: "plus")
-                            Text("추가하기")
-                        }
-                        .font(.pretendardSemiBold18)
-                        .opacity(0) // 추가하기 버튼 크기와 맞추기 위함
-                        
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.counterclockwise")
-                            Text("재시도")
-                        }
-                        .font(.pretendardSemiBold18)
-                    }
-                }
-                .buttonStyle(RetryButtonStyle())
-            }
+        switch resultType {
+        case .complete:
+            completionButton
+
+        case .completeShazam:
+            completionShazamButton
+
+        case .failure:
+            failureButton
         }
     }
+
+    func buttonView(icon: String, title: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+            Text(title)
+                .font(.pretendardSemiBold18)
+        }
+    }
+
+    var completionButton: some View {
+        Button {
+            onAdd()
+        } label: {
+            buttonView(icon: "plus", title: "추가하기")
+        }
+        .buttonStyle(CustomButtonStyle())
+    }
+
+    var completionShazamButton: some View {
+        VStack(spacing: 12) {
+            Button {
+                onAdd()
+            } label: {
+                buttonView(icon: "plus", title: "추가하기")
+            }
+            .buttonStyle(CustomButtonStyle())
+
+            Button {
+                onRetry()
+            } label: {
+                buttonView(icon: "arrow.counterclockwise", title: "재시도")
+            }
+            .buttonStyle(RetryButtonStyle())
+        }
+    }
+
+    var failureButton: some View {
+        Button {
+            onRetry()
+        } label: {
+            buttonView(icon: "arrow.counterclockwise", title: "재시도")
+        }
+        .buttonStyle(RetryButtonStyle())
+    }
+}
+
+#Preview {
+    MediaItemButtonsView(resultType: .completeShazam, onRetry: {}, onAdd: {})
 }

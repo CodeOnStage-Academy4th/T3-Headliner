@@ -5,8 +5,8 @@
 //  Created by Henry on 8/9/25.
 //
 
-import SwiftUI
 import ShazamKit
+import SwiftUI
 
 struct MediaItemView: View {
     // MARK: - Properties
@@ -14,7 +14,8 @@ struct MediaItemView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject var container: DIContainer
     var viewModel: ShazamViewModel
-    let mediaItem: SHMediaItem
+    let mediaItem: SHMediaItem?
+    let result: MusicSearchResult
     let showsRetryButton: Bool
     
     // MARK: - Body
@@ -23,13 +24,13 @@ struct MediaItemView: View {
         ZStack {
             // 메인 컨텐츠 레이아웃
             VStack(spacing: 16) {
-                mediaItemArtwork
-                titleAndArtist
+                self.mediaItemArtwork
+                self.titleAndArtist
                 
                 MediaItemButtonsView(
-                    showsRetryButton: showsRetryButton,
-                    onRetry: viewModel.retry,
-                    onAdd: handleAdd
+                    resultType: self.result.status,
+                    onRetry: self.viewModel.retry,
+                    onAdd: self.handleAdd
                 )
             }
             .frame(maxWidth: .infinity, alignment: .center)
@@ -45,7 +46,7 @@ struct MediaItemView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
-                    viewModel.goToBack()
+                    self.viewModel.goToBack()
                 } label: {
                     Image(systemName: "chevron.left")
                         .foregroundColor(.gray)
@@ -59,7 +60,7 @@ struct MediaItemView: View {
     
     @ViewBuilder
     private var mediaItemArtwork: some View {
-        if let url = mediaItem.artworkURL {
+        if let url = mediaItem?.artworkURL {
             AsyncImage(url: url) { image in
                 image
                     .resizable()
@@ -69,7 +70,7 @@ struct MediaItemView: View {
                     .fill(.secondary.opacity(0.15))
             }
             .frame(width: 240, height: 240)
-            .clipShape(RoundedRectangle(cornerRadius: 10)) 
+            .clipShape(RoundedRectangle(cornerRadius: 10))
         } else {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(.secondary.opacity(0.15))
@@ -79,11 +80,11 @@ struct MediaItemView: View {
     
     private var titleAndArtist: some View {
         VStack(spacing: 6) {
-            Text(mediaItem.title ?? "Unknown track")
+            Text(self.result.title)
                 .font(.pretendardBold20)
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
-            Text(mediaItem.artist ?? "Unknown artist")
+            Text(self.result.artist)
                 .font(.pretendardSemiBold16)
                 .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
@@ -103,12 +104,14 @@ struct MediaItemView: View {
     
     private func handleAdd() {
         Task {
-            let song = mediaItem.toSong()
-            await viewModel.addSong(song: song, context: context)
+            guard let song = mediaItem?.toSong() else {
+                return
+            }
+            await self.viewModel.addSong(song: song, context: self.context)
             
             withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                container.pathModel.removeAll()
-                container.activeTab = .main
+                self.container.pathModel.removeAll()
+                self.container.activeTab = .main
             }
         }
     }

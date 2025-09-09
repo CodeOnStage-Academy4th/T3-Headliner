@@ -5,8 +5,8 @@
 //  Created by Soop on 8/20/25.
 //
 
-import ShazamKit
 import AVFoundation
+import ShazamKit
 
 protocol ShazamManagerType {
     func getMicrophonePermissionStatus() -> AVAudioApplication.recordPermission
@@ -24,7 +24,6 @@ final class ShazamManager: ShazamManagerType {
 }
 
 extension ShazamManager {
-    
     func getMicrophonePermissionStatus() -> AVAudioApplication.recordPermission {
         return AVAudioApplication.shared.recordPermission
     }
@@ -45,24 +44,30 @@ extension ShazamManager {
     }
     
     func startShazam() async -> MusicSearchResult? {
-
         status = .loading
         
-        let result = await self.shManagedSession.result()
-        let matchedItem = await self.handle(result)
+        let result = await shManagedSession.result()
+        let matchedItem = await handle(result) // nil 가능
         
+        var searchResult: MusicSearchResult
         
-        let searchResult = MusicSearchResult(
-            title: matchedItem?.title ?? "결과 없음",
-            artist: matchedItem?.artist ?? "",
-            artworkURL: matchedItem?.artworkURL,
-            mediaItem: matchedItem,
-            showsRetryButton: matchedItem == nil
-        )
+        if let matchedItem = matchedItem {
+            searchResult = MusicSearchResult(status: .completeShazam, title: matchedItem.title ?? "", artist: matchedItem.artist ?? "", artworkURL: matchedItem.artworkURL, mediaItem: matchedItem)
+
+        } else {
+            searchResult = MusicSearchResult(status: .failure, title: "", artist: "", artworkURL: .init(string: ""), mediaItem: nil)
+        }
         
+//        let searchResult = MusicSearchResult(
+//            result: ., title: matchedItem?.title ?? "결과 없음",
+//            artist: matchedItem?.artist ?? "",
+//            artworkURL: matchedItem?.artworkURL,
+//            mediaItem: matchedItem,
+//            showsRetryButton: matchedItem == nil
+//        )
+//
         return searchResult
     }
-    
     
     func cancel() -> ShazamStatus {
         shManagedSession.cancel()
@@ -92,5 +97,4 @@ extension ShazamManager {
             return nil
         }
     }
-    
 }

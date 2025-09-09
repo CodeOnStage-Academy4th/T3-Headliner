@@ -5,16 +5,14 @@
 //  Created by Henry on 8/9/25.
 //
 
-import Foundation
-import ShazamKit
 import Combine
+import Foundation
 import MusicKit
+import ShazamKit
 import SwiftData
-
 
 @MainActor
 final class ShazamViewModel: ObservableObject {
-    
     @Published var currentItem: SHMediaItem?
     @Published var showPermissionAlert: Bool = false
     @Published var result: MusicSearchResult?
@@ -29,7 +27,7 @@ final class ShazamViewModel: ObservableObject {
     @Published var results: [Song] = []
     
     var container: DIContainer
-    var tjMediaService = TJMediaService()                   /// 곡번호
+    var tjMediaService = TJMediaService() /// 곡번호
     var destination: PathType?
     var errorDescription: String?
 
@@ -63,14 +61,12 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func start() {
-        
         let permissionStatus = container.managers.shazamManager.getMicrophonePermissionStatus()
         
         if permissionStatus == .denied {
             showPermissionAlert = true
-            return 
+            return
         }
-        
         
         guard container.managers.shazamManager.isPossibleShazam() == true else {
             return
@@ -96,11 +92,11 @@ final class ShazamViewModel: ObservableObject {
             } else {
                 // 노래를 찾지 못했을 경우
                 let errorResult = MusicSearchResult(
-                    title: "노래를 찾지 못했습니다",
-                    artist: "다시 시도해주세요",
+                    status: .failure,
+                    title: "결과 없음",
+                    artist: "일치하는 컨텐츠를 찾을 수 없습니다.",
                     artworkURL: nil,
-                    mediaItem: nil,
-                    showsRetryButton: true
+                    mediaItem: nil
                 )
                 self.result = errorResult
                 let destination = PathType.result(errorResult)
@@ -117,7 +113,6 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func handleMusicSelection(song: Song) {
-
         container.managers.shazamManager.cancel()
 
         prefetchKaraokeNumber(title: song.title, artist: song.artistName)
@@ -130,13 +125,13 @@ final class ShazamViewModel: ObservableObject {
         let mediaItem = SHMediaItem(properties: properties)
         
         let item = MusicSearchResult(
+            status: .complete,
             title: song.title,
             artist: song.artistName,
             artworkURL: song.artworkURL,
-            mediaItem: mediaItem,
-            showsRetryButton: false
+            mediaItem: mediaItem
         )
-        self.destination = .result(item)
+        destination = .result(item)
         container.pathModel.append(.result(item))
     }
     
@@ -169,8 +164,7 @@ final class ShazamViewModel: ObservableObject {
                     limit: 25
                 )
                 results = searchResults
-            } catch {
-            }
+            } catch {}
         }
     }
     
@@ -254,5 +248,4 @@ final class ShazamViewModel: ObservableObject {
         container.managers.shazamManager.cancel()
         container.pathModel.pop()
     }
-    
 }
