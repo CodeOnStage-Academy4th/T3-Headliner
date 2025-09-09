@@ -1,6 +1,6 @@
-import SwiftUI
-import ShazamKit
 import MusicKit
+import ShazamKit
+import SwiftUI
 
 struct ShazamSearchView: View {
     @EnvironmentObject var container: DIContainer
@@ -12,9 +12,8 @@ struct ShazamSearchView: View {
     @Binding var isScrolled: Bool
     
     var body: some View {
-        NavigationStack(path: $container.pathModel.paths){
+        NavigationStack(path: $container.pathModel.paths) {
             VStack(spacing: 0) {
-                
                 SearchBarView(text: $viewModel.query)
                 
                 if !viewModel.query.isEmpty {
@@ -22,7 +21,6 @@ struct ShazamSearchView: View {
                 } else {
                     shazamDefaultView
                 }
-                
             }
             .toolbarBackgroundVisibility(.hidden, for: .tabBar)
             .navigationDestination(for: PathType.self) { type in
@@ -30,14 +28,12 @@ struct ShazamSearchView: View {
                 case .loading:
                     ShazamLoadingView(viewModel: viewModel)
                 case .result(let item):
-                    if let mediaItem = item.mediaItem {
-                        
-                        MediaItemView(
-                            viewModel: viewModel,
-                            mediaItem: mediaItem,
-                            showsRetryButton: item.showsRetryButton
-                        )
-                    }
+                    MediaItemView(
+                        viewModel: viewModel,
+                        mediaItem: item.mediaItem,
+                        result: item,
+                        showsRetryButton: item.showsRetryButton
+                    )
                 }
             }
             .background {
@@ -47,12 +43,12 @@ struct ShazamSearchView: View {
         .task {
             await container.managers.shazamManager.prepare()
         }
-        .onChange(of: viewModel.query) { oldValue, newValue in
+        .onChange(of: viewModel.query) { _, _ in
             withAnimation(.easeInOut(duration: 0.3)) {
                 isScrolled = false
             }
         }
-        .onChange(of: viewModel.results) { oldValue, newValue in
+        .onChange(of: viewModel.results) { _, newValue in
             if let firstResult = newValue.first {
                 scrolledID = firstResult.id
             }
@@ -79,7 +75,7 @@ struct ShazamSearchView: View {
             .scrollTargetLayout()
         }
         .scrollPosition(id: $scrolledID)
-        .onChange(of: scrolledID) { oldValue, newValue in
+        .onChange(of: scrolledID) { _, _ in
             guard let id = scrolledID else { return }
             
             if id != viewModel.results.first?.id {
@@ -109,7 +105,7 @@ struct ShazamSearchView: View {
     }
     
     private var shazamButton: some View {
-        Button{
+        Button {
             if !viewModel.isListening() {
                 viewModel.start()
             }
@@ -121,8 +117,17 @@ struct ShazamSearchView: View {
                 .foregroundColor(viewModel.isListening() ? .orange : .blue)
         }
         .disabled(viewModel.isListening())
+        .alert("마이크 권한이 없습니다.", isPresented: $viewModel.showPermissionAlert) {
+            Button("앱 설정") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("취소", role: .cancel) {}
+        } message: {
+            Text("Sing Cue 기능을 사용하려면 앱의 마이크 권한을 허용해주세요.")
+        }
     }
-    
     
     private var backgroundView: some View {
         LinearGradient.backgroundGradient.ignoresSafeArea(.all)

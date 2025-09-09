@@ -11,7 +11,8 @@ struct CustomButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .foregroundStyle(Color.white)
-            .padding(.horizontal, 40)
+            .frame(width: 160)
+//            .padding(.horizontal, 40)
             .padding(.vertical, 21)
             .background(LinearGradient.componentGradient)
             .clipShape(RoundedRectangle(cornerRadius: 30))
