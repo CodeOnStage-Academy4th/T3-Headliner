@@ -16,6 +16,7 @@ import SwiftData
 final class ShazamViewModel: ObservableObject {
     
     @Published var currentItem: SHMediaItem?
+    @Published var showPermissionAlert: Bool = false
     @Published var result: MusicSearchResult?
     @Published var query: String = "" {
         didSet {
@@ -62,6 +63,15 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func start() {
+        
+        let permissionStatus = container.managers.shazamManager.getMicrophonePermissionStatus()
+        
+        if permissionStatus == .denied {
+            showPermissionAlert = true
+            return 
+        }
+        
+        
         guard container.managers.shazamManager.isPossibleShazam() == true else {
             return
         }

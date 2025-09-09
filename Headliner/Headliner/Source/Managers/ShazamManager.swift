@@ -9,6 +9,7 @@ import ShazamKit
 import AVFoundation
 
 protocol ShazamManagerType {
+    func getMicrophonePermissionStatus() -> AVAudioApplication.recordPermission
     func getListeningStatus() -> Bool
     func prepare() async
     func startShazam() async -> MusicSearchResult?
@@ -23,6 +24,10 @@ final class ShazamManager: ShazamManagerType {
 }
 
 extension ShazamManager {
+    
+    func getMicrophonePermissionStatus() -> AVAudioApplication.recordPermission {
+        return AVAudioApplication.shared.recordPermission
+    }
     
     func getListeningStatus() -> Bool {
         return isListening
