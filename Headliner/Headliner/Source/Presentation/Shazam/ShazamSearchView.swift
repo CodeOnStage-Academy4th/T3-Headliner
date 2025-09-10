@@ -31,8 +31,7 @@ struct ShazamSearchView: View {
                     MediaItemView(
                         viewModel: viewModel,
                         mediaItem: item.mediaItem,
-                        result: item,
-                        showsRetryButton: item.showsRetryButton
+                        result: item
                     )
                 }
             }

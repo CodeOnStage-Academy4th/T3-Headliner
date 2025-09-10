@@ -107,9 +107,8 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func retry() {
-        start()
         container.pathModel.paths.removeLast()
-        container.pathModel.paths.append(.loading)
+        start()
     }
     
     func handleMusicSelection(song: Song) {
