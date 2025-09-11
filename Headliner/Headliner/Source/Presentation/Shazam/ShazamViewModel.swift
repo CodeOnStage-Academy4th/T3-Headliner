@@ -87,8 +87,8 @@ final class ShazamViewModel: ObservableObject {
                 prefetchKaraokeNumber(title: result.title, artist: result.artist)
                 
                 let destination = PathType.result(result)
-                container.pathModel.paths.removeLast()
-                container.pathModel.paths.append(destination)
+                container.pathModel.pop()
+                container.pathModel.append(destination)
             } else {
                 // 노래를 찾지 못했을 경우
                 let errorResult = MusicSearchResult(
@@ -100,14 +100,14 @@ final class ShazamViewModel: ObservableObject {
                 )
                 self.result = errorResult
                 let destination = PathType.result(errorResult)
-                container.pathModel.paths.removeLast()
-                container.pathModel.paths.append(destination)
+                container.pathModel.pop()
+                container.pathModel.append(destination)
             }
         }
     }
     
     func retry() {
-        container.pathModel.paths.removeLast()
+        container.pathModel.pop()
         start()
     }
     

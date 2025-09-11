@@ -17,10 +17,9 @@ struct ShazamLoadingView: View {
         GeometryReader { proxy in
             // 1) VideoPlayer를 전체 화면에 깔기
             ZStack {
-                VideoPlayer(player: loopingPlayer.player)
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: proxy.size.width, height: proxy.size.height)
-                    .allowsHitTesting(false)
+                LinearGradient.backgroundGradient
+                LoopingVideoBackground(player: loopingPlayer.player)
+                    .ignoresSafeArea()
                     .onAppear {
                         loopingPlayer.player.play()
                     }
