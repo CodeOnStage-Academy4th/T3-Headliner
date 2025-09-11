@@ -7,7 +7,9 @@
 
 import AVFoundation
 import Foundation
-import Combine
+import SwiftUI
+import AVKit
+
 
 final class LoopingPlayer: ObservableObject {
     let player: AVQueuePlayer
@@ -28,4 +30,19 @@ final class LoopingPlayer: ObservableObject {
         player.isMuted = true
         player.actionAtItemEnd = .none
     }
+}
+
+struct LoopingVideoBackground: UIViewRepresentable {
+    let player: AVQueuePlayer
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        let playerLayer = AVPlayerLayer(player: player)
+        playerLayer.videoGravity = .resizeAspectFill  // ✅ 꽉 채우기
+        playerLayer.frame = UIScreen.main.bounds
+        view.layer.addSublayer(playerLayer)
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
 }
