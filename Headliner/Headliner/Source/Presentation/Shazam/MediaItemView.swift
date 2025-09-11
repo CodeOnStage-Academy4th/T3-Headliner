@@ -9,29 +9,36 @@ import ShazamKit
 import SwiftUI
 
 struct MediaItemView: View {
-    // MARK: - Properties
-    
     @Environment(\.modelContext) private var context
     @EnvironmentObject var container: DIContainer
     var viewModel: ShazamViewModel
     let mediaItem: SHMediaItem?
     let result: MusicSearchResult
-    let showsRetryButton: Bool
-    
-    // MARK: - Body
     
     var body: some View {
+        switch self.result.status {
+        case .failure:
+            ShazamSearchFailView(
+                onRetry: self.viewModel.retry,
+                onBack: self.viewModel.goToBack
+            )
+            
+        case .complete:
+            self.successContentView(showRetryButton: false)
+            
+        case .completeShazam:
+            self.successContentView(showRetryButton: true)
+        }
+    }
+    
+    private func successContentView(showRetryButton: Bool) -> some View {
         ZStack {
-            // 메인 컨텐츠 레이아웃
             VStack(spacing: 16) {
                 self.mediaItemArtwork
                 self.titleAndArtist
                 
-                MediaItemButtonsView(
-                    resultType: self.result.status,
-                    onRetry: self.viewModel.retry,
-                    onAdd: self.handleAdd
-                )
+                // 상태에 따른 버튼 표시
+                self.buttonSection(showRetryButton: showRetryButton)
             }
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 20)
@@ -56,7 +63,43 @@ struct MediaItemView: View {
         }
     }
     
-    // MARK: - UI Components
+    @ViewBuilder
+    private func buttonSection(showRetryButton: Bool) -> some View {
+        if showRetryButton {
+            // 추가하기 + 재시도 버튼
+            VStack(spacing: 12) {
+                Button {
+                    self.handleAdd()
+                } label: {
+                    self.buttonView(icon: "plus", title: "추가하기")
+                }
+                .buttonStyle(CustomButtonStyle())
+                
+                Button {
+                    self.viewModel.retry()
+                } label: {
+                    self.buttonView(icon: "arrow.counterclockwise", title: "재시도")
+                }
+                .buttonStyle(RetryButtonStyle())
+            }
+        } else {
+            // 추가하기 버튼만
+            Button {
+                self.handleAdd()
+            } label: {
+                self.buttonView(icon: "plus", title: "추가하기")
+            }
+            .buttonStyle(CustomButtonStyle())
+        }
+    }
+    
+    private func buttonView(icon: String, title: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+            Text(title)
+                .font(.pretendardSemiBold18)
+        }
+    }
     
     @ViewBuilder
     private var mediaItemArtwork: some View {
@@ -92,15 +135,6 @@ struct MediaItemView: View {
         .padding(.top, 10)
         .padding(.bottom, 20)
     }
-    
-    // MARK: - Actions
-    
-    //    private func handleRetry() {
-    ////        container.pathModel.paths.removeLast()
-    ////        container.pathModel.paths.append(.loading)
-    //        viewModel.retry()
-    ////TODO: retry
-    //    }
     
     private func handleAdd() {
         Task {

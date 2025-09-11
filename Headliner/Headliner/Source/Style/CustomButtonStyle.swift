@@ -12,7 +12,6 @@ struct CustomButtonStyle: ButtonStyle {
         configuration.label
             .foregroundStyle(Color.white)
             .frame(width: 160)
-//            .padding(.horizontal, 40)
             .padding(.vertical, 21)
             .background(LinearGradient.componentGradient)
             .clipShape(RoundedRectangle(cornerRadius: 30))
