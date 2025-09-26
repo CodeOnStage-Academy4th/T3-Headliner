@@ -30,10 +30,10 @@ final class ShazamViewModel: ObservableObject {
     var tjMediaService = TJMediaService() /// 곡번호
     var destination: PathType?
     var errorDescription: String?
-
+    
     private var cancellables = Set<AnyCancellable>()
     private var shazamTask: Task<Void, Never>?
-
+    
     init(container: DIContainer) {
         self.container = container
     }
@@ -66,7 +66,23 @@ final class ShazamViewModel: ObservableObject {
         if permissionStatus == .denied {
             showPermissionAlert = true
             return
+        } else if permissionStatus == .undetermined {
+            Task {
+                let granted = await container.managers.shazamManager.requestMicrophonePermission()
+                guard granted else {
+                    await MainActor.run { self.showPermissionAlert = true }
+                    return
+                }
+                await executeShazam()
+            }
+            return
         }
+        Task {
+            await executeShazam()
+        }
+    }
+    
+    func executeShazam() async {
         
         guard container.managers.shazamManager.isPossibleShazam() == true else {
             return
@@ -78,6 +94,7 @@ final class ShazamViewModel: ObservableObject {
         container.pathModel.paths.append(.loading)
         
         shazamTask = Task {
+            await container.managers.shazamManager.prepare()
             let result = await container.managers.shazamManager.startShazam()
             
             guard !Task.isCancelled else { return }
@@ -113,9 +130,9 @@ final class ShazamViewModel: ObservableObject {
     
     func handleMusicSelection(song: Song) {
         container.managers.shazamManager.cancel()
-
+        
         prefetchKaraokeNumber(title: song.title, artist: song.artistName)
-
+        
         let properties: [SHMediaItemProperty: Any] = [
             .title: song.title,
             .artist: song.artistName,
@@ -187,7 +204,7 @@ final class ShazamViewModel: ObservableObject {
             print("@Log - \(error)")
             return
         }
-
+        
         let fetchedKaraokeNumber: String?
         if let cached = getCachedKaraokeNumber(title: song.title, artist: song.artistName) {
             fetchedKaraokeNumber = cached
@@ -214,21 +231,21 @@ final class ShazamViewModel: ObservableObject {
             return nil
         }
     }
-
+    
     private func getCacheKey(title: String, artist: String) -> String {
         return "\(title)-\(artist)"
     }
-
+    
     func getCachedKaraokeNumber(title: String, artist: String) -> String? {
         let key = getCacheKey(title: title, artist: artist)
         return karaokeNumberCache[key]
     }
-
+    
     private func prefetchKaraokeNumber(title: String, artist: String) {
         let key = getCacheKey(title: title, artist: artist)
-
+        
         guard karaokeNumberCache[key] == nil else { return }
-
+        
         Task {
             if let number = await getKaraokeNumber(title: title, singer: artist) {
                 await MainActor.run {

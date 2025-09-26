@@ -39,9 +39,6 @@ struct ShazamSearchView: View {
                 backgroundView.ignoresSafeArea(.all)
             }
         }
-        .task {
-            await container.managers.shazamManager.prepare()
-        }
         .onChange(of: viewModel.query) { _, _ in
             withAnimation(.easeInOut(duration: 0.3)) {
                 isScrolled = false
