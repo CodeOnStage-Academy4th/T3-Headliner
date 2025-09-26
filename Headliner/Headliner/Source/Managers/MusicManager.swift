@@ -11,16 +11,41 @@ import MusicKit
 protocol MusicManagerType {
     func requestAuthorization() async -> MusicAuthorization.Status
     func searchSongs(term: String, limit: Int) async throws -> [Song]
+    func warmUp() async
 }
 
 final class MusicManager: MusicManagerType {
-
     private let storefront = "kr"
     private let languageHeader = "ko-KR"
-        private var developerToken: String {
+    private var developerToken: String {
         return Bundle.main.object(forInfoDictionaryKey: "appleMusicDeveloperToken") as? String ?? ""
     }
 
+    func warmUp() async {
+        guard developerToken.isEmpty == false,
+              let url = URL(string: "https://api.music.apple.com/v1/test")
+        else {
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(developerToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(languageHeader, forHTTPHeaderField: "Accept-Language")
+
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 204 else {
+                return
+            }
+        } catch {
+            #if DEBUG
+            print("[AppleMusicAPI] warm-up failed:", error)
+            #endif
+        }
+    }
+
+    // 향후 뮤직킷 권한에서 사용 될 예정
     func requestAuthorization() async -> MusicAuthorization.Status {
         await MusicAuthorization.request()
     }
@@ -43,7 +68,7 @@ final class MusicManager: MusicManagerType {
 
         let (data, response) = try await URLSession.shared.data(for: request)
 
-        if let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) == false {
+        if let http = response as? HTTPURLResponse, (200 ... 299).contains(http.statusCode) == false {
             #if DEBUG
             if let body = String(data: data, encoding: .utf8) { print("[AppleMusicAPI] Error: \(http.statusCode)\n\(body)") }
             #endif

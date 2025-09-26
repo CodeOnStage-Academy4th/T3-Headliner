@@ -11,9 +11,9 @@ import SwiftUI
 @main
 struct HeadlinerApp: App {
     @StateObject var container = DIContainer(managers: Managers())
-    
+
     let dataContainer: ModelContainer
-    
+
     init() {
         do {
             dataContainer = try ModelContainer(for: Song.self, PlaylistMusic.self)
@@ -21,12 +21,16 @@ struct HeadlinerApp: App {
             fatalError("\(error)")
         }
     }
+
     var body: some Scene {
         WindowGroup {
             HomeView()
 //                .environmentObject(PathModel())
                 .environmentObject(container)
                 .modelContainer(dataContainer)
+                .task {
+                    await container.managers.musicManager.warmUp()
+                }
         }
     }
 }
