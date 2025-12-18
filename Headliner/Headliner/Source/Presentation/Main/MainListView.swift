@@ -16,7 +16,9 @@ struct MainListView: View {
     let viewTitle: String = "나의 뮤직 리스트"
     
     @Binding var isScrolled: Bool
-    @State private var scrolledID: PlaylistMusic.ID?
+    @State private var previousScrollOffset: CGFloat = 0
+    
+    private let scrollThreshold: CGFloat = 20
     
     var body: some View {
         ZStack {
@@ -31,6 +33,7 @@ struct MainListView: View {
         .toolbarBackgroundVisibility(.hidden, for: .tabBar)
         .onAppear {
             isScrolled = false
+            previousScrollOffset = 0
         }
     }
     
@@ -83,18 +86,24 @@ struct MainListView: View {
             }
             .scrollTargetLayout()
         }
-        .scrollPosition(id: $scrolledID)
-        .onChange(of: scrolledID) { oldValue, newValue in
-            if scrolledID != playlists.first?.id {
-                // Soop TODO: - 중복 코드 수정하기
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentOffset.y
+        } action: { oldValue, newValue in
+            let delta = newValue - previousScrollOffset
+            
+            if delta > scrollThreshold {
+                // 아래로 스크롤 (content가 위로 올라감)
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isScrolled = true
                 }
-            } else {
+            } else if delta < -scrollThreshold {
+                // 위로 스크롤 (content가 아래로 내려감)
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isScrolled = false
                 }
             }
+            
+            previousScrollOffset = newValue
         }
     }
     
