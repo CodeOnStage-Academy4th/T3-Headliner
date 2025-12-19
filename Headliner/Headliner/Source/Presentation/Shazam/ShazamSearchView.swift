@@ -6,10 +6,11 @@ struct ShazamSearchView: View {
     @EnvironmentObject var container: DIContainer
     
     @StateObject var viewModel: ShazamViewModel
-    @State private var scrolledID: MusicSearchResult.ID?
-    @State private var scrollPostion: ScrollPosition = .init(idType: MusicSearchResult.ID.self)
+    @State private var previousScrollOffset: CGFloat = 0
     
     @Binding var isScrolled: Bool
+    
+    private let scrollThreshold: CGFloat = 20
     
     var body: some View {
         NavigationStack(path: $container.pathModel.paths) {
@@ -43,11 +44,7 @@ struct ShazamSearchView: View {
             withAnimation(.easeInOut(duration: 0.3)) {
                 isScrolled = false
             }
-        }
-        .onChange(of: viewModel.results) { _, newValue in
-            if let firstResult = newValue.first {
-                scrolledID = firstResult.id
-            }
+            previousScrollOffset = 0
         }
     }
     
@@ -70,19 +67,24 @@ struct ShazamSearchView: View {
             }
             .scrollTargetLayout()
         }
-        .scrollPosition(id: $scrolledID)
-        .onChange(of: scrolledID) { _, _ in
-            guard let id = scrolledID else { return }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentOffset.y
+        } action: { oldValue, newValue in
+            let delta = newValue - previousScrollOffset
             
-            if id != viewModel.results.first?.id {
+            if delta > scrollThreshold {
+                // 아래로 스크롤 (content가 위로 올라감)
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isScrolled = true
                 }
-            } else {
+            } else if delta < -scrollThreshold {
+                // 위로 스크롤 (content가 아래로 내려감)
                 withAnimation(.easeInOut(duration: 0.3)) {
                     isScrolled = false
                 }
             }
+            
+            previousScrollOffset = newValue
         }
     }
     
