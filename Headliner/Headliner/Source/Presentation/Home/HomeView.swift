@@ -10,17 +10,19 @@ struct HomeView: View {
 
     var body: some View {
         TabView(selection: $container.activeTab) {
-            MainListView(
-                viewModel: .init(container: container),
-                isScrolled: $isScrolled
-            )
-            .tag(TabItem.main)
+            Tab("", image: "threeLine", value: .main) {
+                MainListView(
+                    viewModel: .init(container: container),
+                    isScrolled: $isScrolled
+                )
+            }
 
-            ShazamSearchView(
-                viewModel: .init(container: container),
-                isScrolled: $isScrolled
-            )
-            .tag(TabItem.search)
+            Tab("", image: "mag", value: .search) {
+                ShazamSearchView(
+                    viewModel: .init(container: container),
+                    isScrolled: $isScrolled
+                )
+            }
         }
         .tabViewStyle(.automatic)
         .environmentObject(container)
