@@ -9,6 +9,15 @@ struct HomeView: View {
     @State private var isKeyboardVisible: Bool = false
 
     var body: some View {
+        if #available(iOS 26, *) {
+            ios26TabView
+        } else {
+            legacyTabView
+        }
+    }
+    
+    @available(iOS 26, *)
+    private var ios26TabView: some View {
         TabView(selection: $container.activeTab) {
             Tab("", image: "threeLine", value: .main) {
                 MainListView(
@@ -24,6 +33,38 @@ struct HomeView: View {
                 )
             }
         }
+        .tint(.white) // 선택된 아이콘 색상만 설정
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .environmentObject(container)
+        .onAppear {
+            container.setModelContext(modelContext)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            isKeyboardVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            isKeyboardVisible = false
+        }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+    }
+    
+    // MARK: - iOS 26 미만
+    private var legacyTabView: some View {
+        TabView(selection: $container.activeTab) {
+            MainListView(
+                viewModel: .init(container: container),
+                isScrolled: $isScrolled
+            )
+            .tag(TabItem.main)
+
+            ShazamSearchView(
+                viewModel: .init(container: container),
+                isScrolled: $isScrolled
+            )
+            .tag(TabItem.search)
+        }
         .tabViewStyle(.automatic)
         .environmentObject(container)
         .onAppear {
@@ -31,16 +72,14 @@ struct HomeView: View {
         }
         .overlay(alignment: .bottom) {
             if !isKeyboardVisible && container.pathModel.paths.isEmpty {
-                if #unavailable(iOS 26) {
-                    CustomTabBar(
-                        isScrolled: $isScrolled,
-                        showsSearchBar: true,
-                        activeTab: $container.activeTab
-                    )
-                    .padding(.horizontal, 25)
-                    .padding(.bottom, 30)
-                    .background(.clear)
-                }
+                CustomTabBar(
+                    isScrolled: $isScrolled,
+                    showsSearchBar: true,
+                    activeTab: $container.activeTab
+                )
+                .padding(.horizontal, 25)
+                .padding(.bottom, 30)
+                .background(.clear)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
@@ -56,7 +95,6 @@ struct HomeView: View {
 }
 
 // MARK: - ScrollOffsetPreferenceKey
-
 struct ScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
 
@@ -64,7 +102,3 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
         value = nextValue()
     }
 }
-
-// #Preview {
-//    HomeView()
-// }
