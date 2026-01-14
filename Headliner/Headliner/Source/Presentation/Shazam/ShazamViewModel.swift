@@ -207,26 +207,24 @@ final class ShazamViewModel: ObservableObject {
             return
         }
 
-        // 1. TJ 번호 우선 가져오기
-        let tjNumber = await fetchTJNumber(title: song.title, artist: song.artistName)
+        // 1. 캐시를 활용하여 TJ/KY 번호 가져오기
+        let karaokeNumbers = await fetchKaraokeNumbers(title: song.title, artist: song.artistName)
         
-        // 2. 즉시 저장 (KY는 nil)
+        // 2. 즉시 저장 (TJ는 바로 설정, KY는 백그라운드에서 업데이트)
         let newPlaylistSong = PlaylistMusic(
             originalSong: song,
-            tjNumber: tjNumber ?? "없음",
+            tjNumber: karaokeNumbers.tj,
             kyNumber: nil
         )
         
         context.insert(newPlaylistSong)
-        print("Playlist에 추가됨: \(song.title) - TJ: \(tjNumber ?? "없음"), KY: Fetching...")
+        print("Playlist에 추가됨: \(song.title) - TJ: \(karaokeNumbers.tj), KY: Fetching...")
         
-        // 3. KY 번호 백그라운드로 가져오기
+        // 3. KY 번호 백그라운드로 업데이트 (이미 가져온 값 사용)
         Task {
-            let kyNumber = await fetchKYNumber(title: song.title, artist: song.artistName)
-            
             await MainActor.run {
-                newPlaylistSong.kyNumber = kyNumber ?? "없음"
-                print("KY Update 완료: \(song.title) - \(kyNumber ?? "없음")")
+                newPlaylistSong.kyNumber = karaokeNumbers.ky
+                print("KY Update 완료: \(song.title) - \(karaokeNumbers.ky)")
             }
         }
     }
