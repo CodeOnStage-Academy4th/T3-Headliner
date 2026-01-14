@@ -207,24 +207,42 @@ final class ShazamViewModel: ObservableObject {
             return
         }
 
-        // 1. 캐시를 활용하여 TJ/KY 번호 가져오기
-        let karaokeNumbers = await fetchKaraokeNumbers(title: song.title, artist: song.artistName)
+        let key = getCacheKey(title: song.title, artist: song.artistName)
+        let cached = karaokeCache[key]
         
-        // 2. 즉시 저장 (TJ는 바로 설정, KY는 백그라운드에서 업데이트)
+        // 1. TJ 번호 처리 (캐시 있으면 사용, 없으면 API 호출)
+        let tjNumber: String
+        if let cached = cached {
+            tjNumber = cached.tj
+        } else {
+            tjNumber = await fetchTJNumber(title: song.title, artist: song.artistName) ?? "없음"
+            // TJ를 가져온 후 즉시 캐시에 저장 (Race condition 방지)
+            karaokeCache[key] = KaraokeNumbers(tj: tjNumber, ky: "없음")
+        }
+        
+        // 2. 즉시 저장
         let newPlaylistSong = PlaylistMusic(
             originalSong: song,
-            tjNumber: karaokeNumbers.tj,
+            tjNumber: tjNumber,
             kyNumber: nil
         )
-        
         context.insert(newPlaylistSong)
-        print("Playlist에 추가됨: \(song.title) - TJ: \(karaokeNumbers.tj), KY: Fetching...")
         
-        // 3. KY 번호 백그라운드로 업데이트 (이미 가져온 값 사용)
-        Task {
-            await MainActor.run {
-                newPlaylistSong.kyNumber = karaokeNumbers.ky
-                print("KY Update 완료: \(song.title) - \(karaokeNumbers.ky)")
+        // 3. KY 번호 처리 (캐시에 있으면 즉시 설정, 없으면 백그라운드에서 가져오기)
+        if let cached = cached, cached.ky != "없음" {
+            newPlaylistSong.kyNumber = cached.ky
+            print("Playlist에 추가됨: \(song.title) - TJ: \(tjNumber), KY: \(cached.ky)")
+        } else {
+            print("Playlist에 추가됨: \(song.title) - TJ: \(tjNumber), KY: Fetching...")
+            
+            Task {
+                let kyNumber = await fetchKYNumber(title: song.title, artist: song.artistName) ?? "없음"
+                
+                await MainActor.run {
+                    karaokeCache[key] = KaraokeNumbers(tj: tjNumber, ky: kyNumber)
+                    newPlaylistSong.kyNumber = kyNumber
+                    print("KY Update 완료: \(song.title) - \(kyNumber)")
+                }
             }
         }
     }
