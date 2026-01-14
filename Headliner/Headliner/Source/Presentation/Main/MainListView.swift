@@ -80,6 +80,7 @@ struct MainListView: View {
         let items = KaraokeType.allCases
         let width: CGFloat = 60
         let height: CGFloat = 36
+        let padding: CGFloat = 4
         
         return ZStack(alignment: .leading) {
             Capsule()
