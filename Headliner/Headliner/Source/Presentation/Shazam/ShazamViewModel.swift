@@ -11,6 +11,11 @@ import MusicKit
 import ShazamKit
 import SwiftData
 
+struct KaraokeNumbers {
+    let tj: String
+    let ky: String
+}
+
 @MainActor
 final class ShazamViewModel: ObservableObject {
     @Published var currentItem: SHMediaItem?
@@ -23,16 +28,19 @@ final class ShazamViewModel: ObservableObject {
         }
     }
     
-    @Published var karaokeNumberCache: [String: String] = [:]
     @Published var results: [Song] = []
     
     var container: DIContainer
-    var tjMediaService = TJMediaService() /// 곡번호
+    var tjMediaService = TJMediaService()
+    var kyMediaService = KYMediaService()
     var destination: PathType?
     var errorDescription: String?
     
     private var cancellables = Set<AnyCancellable>()
     private var shazamTask: Task<Void, Never>?
+    
+    // 캐시: [title-artist: KaraokeNumbers]
+    private var karaokeCache: [String: KaraokeNumbers] = [:]
     
     init(container: DIContainer) {
         self.container = container
@@ -41,7 +49,6 @@ final class ShazamViewModel: ObservableObject {
     func requestAuthorization() async -> MusicAuthorization.Status {
         let result = await container.managers.musicManager.requestAuthorization()
         
-        // TODO: 권한에 따른 화면 처리
         switch result {
         case .notDetermined:
             print("not determined")
@@ -83,12 +90,10 @@ final class ShazamViewModel: ObservableObject {
     }
     
     func executeShazam() async {
-        
         guard container.managers.shazamManager.isPossibleShazam() == true else {
             return
         }
         
-        // 이전 Task가 있다면 취소
         shazamTask?.cancel()
         
         container.pathModel.paths.append(.loading)
@@ -101,13 +106,12 @@ final class ShazamViewModel: ObservableObject {
             
             if let result = result, result.mediaItem != nil {
                 self.result = result
-                prefetchKaraokeNumber(title: result.title, artist: result.artist)
+                prefetchKaraokeNumbers(title: result.title, artist: result.artist)
                 
                 let destination = PathType.result(result)
                 container.pathModel.pop()
                 container.pathModel.append(destination)
             } else {
-                // 노래를 찾지 못했을 경우
                 let errorResult = MusicSearchResult(
                     status: .failure,
                     title: "결과 없음",
@@ -131,7 +135,7 @@ final class ShazamViewModel: ObservableObject {
     func handleMusicSelection(song: Song) {
         container.managers.shazamManager.cancel()
         
-        prefetchKaraokeNumber(title: song.title, artist: song.artistName)
+        prefetchKaraokeNumbers(title: song.title, artist: song.artistName)
         
         let properties: [SHMediaItemProperty: Any] = [
             .title: song.title,
@@ -154,17 +158,15 @@ final class ShazamViewModel: ObservableObject {
     private var searchTask: Task<Void, Error>?
     
     private func handleQueryChange(newQuery: String) {
-        // 이전 검색 취소
         searchTask?.cancel()
         
-        // 새로운 검색 예약
         searchTask = Task {
             try await Task.sleep(for: .milliseconds(500))
             
             if newQuery.count >= 2 {
                 await search(with: newQuery)
             } else {
-                results = [] // 검색어가 짧으면 결과 초기화
+                results = []
             }
         }
     }
@@ -204,56 +206,84 @@ final class ShazamViewModel: ObservableObject {
             print("@Log - \(error)")
             return
         }
+
+        // 1. 캐시를 활용하여 TJ/KY 번호 가져오기
+        let karaokeNumbers = await fetchKaraokeNumbers(title: song.title, artist: song.artistName)
         
-        let fetchedKaraokeNumber: String?
-        if let cached = getCachedKaraokeNumber(title: song.title, artist: song.artistName) {
-            fetchedKaraokeNumber = cached
-        } else {
-            fetchedKaraokeNumber = await getKaraokeNumber(title: song.title, singer: song.artistName)
-        }
-        
+        // 2. 즉시 저장 (TJ는 바로 설정, KY는 백그라운드에서 업데이트)
         let newPlaylistSong = PlaylistMusic(
             originalSong: song,
-            karaokeNumber: fetchedKaraokeNumber ?? "없음"
+            tjNumber: karaokeNumbers.tj,
+            kyNumber: nil
         )
         
         context.insert(newPlaylistSong)
+        print("Playlist에 추가됨: \(song.title) - TJ: \(karaokeNumbers.tj), KY: Fetching...")
         
-        print("Playlist에 추가됨: \(newPlaylistSong.originalSong.title) - 노래방 번호: \(newPlaylistSong.karaokeNumber ?? "없음")")
+        // 3. KY 번호 백그라운드로 업데이트 (이미 가져온 값 사용)
+        Task {
+            await MainActor.run {
+                newPlaylistSong.kyNumber = karaokeNumbers.ky
+                print("KY Update 완료: \(song.title) - \(karaokeNumbers.ky)")
+            }
+        }
     }
     
-    @MainActor
-    func getKaraokeNumber(title: String, singer: String) async -> String? {
+    
+    private func getCacheKey(title: String, artist: String) -> String {
+        "\(title)-\(artist)"
+    }
+    
+    /// 캐시 확인 후, 없으면 TJ/KY 병렬로 fetch
+    private func fetchKaraokeNumbers(title: String, artist: String) async -> KaraokeNumbers {
+        let key = getCacheKey(title: title, artist: artist)
+        
+        // 캐시에 있으면 바로 리턴
+        if let cached = karaokeCache[key] {
+            return cached
+        }
+        
+        // 병렬로 fetch
+        async let tj = fetchTJNumber(title: title, artist: artist)
+        async let ky = fetchKYNumber(title: title, artist: artist)
+        
+        let numbers = KaraokeNumbers(
+            tj: await tj ?? "없음",
+            ky: await ky ?? "없음"
+        )
+        
+        // 캐시 저장
+        karaokeCache[key] = numbers
+        
+        return numbers
+    }
+    
+    private func fetchTJNumber(title: String, artist: String) async -> String? {
         do {
-            return try await tjMediaService.fetchKaraokeNumber(title: title, artist: singer)
+            return try await tjMediaService.fetchKaraokeNumber(title: title, artist: artist)
         } catch {
-            print("노래방 번호 가져오기 실패: \(error.localizedDescription)")
+            print("TJ 번호 가져오기 실패: \(error.localizedDescription)")
             return nil
         }
     }
     
-    private func getCacheKey(title: String, artist: String) -> String {
-        return "\(title)-\(artist)"
-    }
-    
-    func getCachedKaraokeNumber(title: String, artist: String) -> String? {
-        let key = getCacheKey(title: title, artist: artist)
-        return karaokeNumberCache[key]
-    }
-    
-    private func prefetchKaraokeNumber(title: String, artist: String) {
-        let key = getCacheKey(title: title, artist: artist)
-        
-        guard karaokeNumberCache[key] == nil else { return }
-        
-        Task {
-            if let number = await getKaraokeNumber(title: title, singer: artist) {
-                await MainActor.run {
-                    karaokeNumberCache[key] = number
-                }
-            }
+    private func fetchKYNumber(title: String, artist: String) async -> String? {
+        do {
+            return try await kyMediaService.fetchKaraokeNumber(title: title, artist: artist)
+        } catch {
+            print("KY 번호 가져오기 실패: \(error.localizedDescription)")
+            return nil
         }
     }
+    
+    /// 미리 가져오기 (백그라운드에서 비동기로)
+    private func prefetchKaraokeNumbers(title: String, artist: String) {
+        Task {
+            await fetchKaraokeNumbers(title: title, artist: artist)
+        }
+    }
+    
+    // MARK: - Navigation
     
     func goToPlaylist() {
         container.pathModel.removeAll()

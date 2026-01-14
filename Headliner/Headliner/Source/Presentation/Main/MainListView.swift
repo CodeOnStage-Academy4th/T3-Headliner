@@ -5,11 +5,15 @@
 //  Created by Henry on 8/9/25.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
+
+enum KaraokeType: String, CaseIterable {
+    case tj = "TJ"
+    case ky = "KY"
+}
 
 struct MainListView: View {
-    
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
     
     var viewModel: PlaylistViewModel
@@ -17,8 +21,18 @@ struct MainListView: View {
     
     @Binding var isScrolled: Bool
     @State private var previousScrollOffset: CGFloat = 0
+    @State private var selectedType: KaraokeType = .tj
     
     private let scrollThreshold: CGFloat = 20
+    
+    // 선택된 타입에 따라 표시할 노래번호를 결정
+    private func getKaraokeNumber(for playlist: PlaylistMusic) -> String {
+        if selectedType == .tj {
+            return playlist.tjNumber ?? ""
+        } else {
+            return playlist.kyNumber ?? ""
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -40,22 +54,66 @@ struct MainListView: View {
     var musicListView: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
-                titleView
+                titleHeaderView
                 scrollView
             }
             bottomDeemedlayer
         }
     }
     
-    var titleView: some View {
-        Text(viewTitle)
-            .font(.pretendardBold20)
-            .foregroundStyle(.white)
-            .padding(.top, 40)
-            .padding(.horizontal, 25)
-            .padding(.bottom, 20)
+    var titleHeaderView: some View {
+        HStack(alignment: .center) {
+            Text(viewTitle)
+                .font(.pretendardBold20)
+                .foregroundStyle(.white)
+            
+            Spacer()
+            
+            segmentPicker
+        }
+        .padding(.top, 40)
+        .padding(.horizontal, 25)
+        .padding(.bottom, 20)
     }
     
+    var segmentPicker: some View {
+        let items = KaraokeType.allCases
+        let width: CGFloat = 60
+        let height: CGFloat = 36
+        let padding: CGFloat = 4
+        
+        return ZStack(alignment: .leading) {
+            Capsule()
+                .fill(Color.white.opacity(0.1))
+                .frame(
+                    width: width * CGFloat(items.count) + padding * 2,
+                    height: height + padding * 2
+                )
+            
+            Capsule()
+                .fill(Color.white)
+                .frame(width: width, height: height)
+                .offset(
+                    x: CGFloat(items.firstIndex(of: selectedType) ?? 0) * width + padding
+                )
+                .animation(.easeInOut(duration: 0.2), value: selectedType)
+            
+            HStack(spacing: 0) {
+                ForEach(items, id: \.self) { type in
+                    Button {
+                        selectedType = type
+                    } label: {
+                        Text(type.rawValue)
+                            .font(.pretendardSemiBold16)
+                            .foregroundStyle(selectedType == type ? .black : .white)
+                            .frame(width: width, height: height)
+                    }
+                }
+            }
+            .padding(4)
+        }
+    }
+  
     var scrollView: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
@@ -66,29 +124,27 @@ struct MainListView: View {
                                  artistName: t.originalSong.artistName,
                                  artworkURL: t.originalSong.artworkURL,
                                  previewURL: t.originalSong.previewURL,
-                                 karaokeNumber: t.karaokeNumber)
-                    .swipeActions(edge: .trailing) {
-                        Button {
-                            viewModel.deleteItems(
-                                at: IndexSet(integer: index),
-                                from: playlists
-                            )
-                        } label: {
-                            Image(.delete)
-                                .offset(x: 3)
-                            
+                                 karaokeNumber: getKaraokeNumber(for: t))
+                        .swipeActions(edge: .trailing) {
+                            Button {
+                                viewModel.deleteItems(
+                                    at: IndexSet(integer: index),
+                                    from: playlists
+                                )
+                            } label: {
+                                Image(.delete)
+                                    .offset(x: 3)
+                            }
+                            .tint(.clear)
                         }
-                        .tint(.clear)
-                        
-                    }
-                    .enableScrollViewSwipeActions()
+                        .enableScrollViewSwipeActions()
                 }
             }
             .scrollTargetLayout()
         }
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y
-        } action: { oldValue, newValue in
+        } action: { _, newValue in
             let delta = newValue - previousScrollOffset
             
             if delta > scrollThreshold {

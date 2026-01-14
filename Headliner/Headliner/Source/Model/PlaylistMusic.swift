@@ -6,13 +6,16 @@ import SwiftData
 class PlaylistMusic: Identifiable {
     @Attribute(.unique) var id: String = UUID().uuidString
     var originalSong: Song
-    var karaokeNumber: String?
+    var tjNumber: String?
+    var kyNumber: String?
     
     init(
         originalSong: Song,
-        karaokeNumber: String? = nil
+        tjNumber: String? = nil,
+        kyNumber: String? = nil
     ) {
         self.originalSong = originalSong
-        self.karaokeNumber = karaokeNumber
+        self.tjNumber = tjNumber
+        self.kyNumber = kyNumber
     }
 }
