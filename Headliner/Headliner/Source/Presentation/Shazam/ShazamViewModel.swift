@@ -29,6 +29,7 @@ final class ShazamViewModel: ObservableObject {
     }
     
     @Published var results: [Song] = []
+    @Published var addedSongIDs: Set<String> = []
     
     var container: DIContainer
     var tjMediaService = TJMediaService()
@@ -132,27 +133,28 @@ final class ShazamViewModel: ObservableObject {
         start()
     }
     
-    func handleMusicSelection(song: Song) {
-        container.managers.shazamManager.cancel()
+    /// SwiftData에서 이미 추가된 노래 ID를 로드
+    func loadAddedSongIDs(context: ModelContext) {
+        let descriptor = FetchDescriptor<PlaylistMusic>()
         
-        prefetchKaraokeNumbers(title: song.title, artist: song.artistName)
+        do {
+            let existing = try context.fetch(descriptor)
+            addedSongIDs = Set(existing.map { $0.originalSong.id })
+        } catch {
+            print("@Log - addedSongIDs 로드 실패: \(error)")
+        }
+    }
+    
+    /// 검색 결과에서 노래 추가 (화면 이동 없이)
+    @MainActor
+    func addSongFromSearch(song: Song, context: ModelContext) async {
+        // 이미 추가된 노래인지 확인
+        guard !addedSongIDs.contains(song.id) else { return }
         
-        let properties: [SHMediaItemProperty: Any] = [
-            .title: song.title,
-            .artist: song.artistName,
-            .artworkURL: song.artworkURL as Any
-        ]
-        let mediaItem = SHMediaItem(properties: properties)
+        await addSong(song: song, context: context)
         
-        let item = MusicSearchResult(
-            status: .complete,
-            title: song.title,
-            artist: song.artistName,
-            artworkURL: song.artworkURL,
-            mediaItem: mediaItem
-        )
-        destination = .result(item)
-        container.pathModel.append(.result(item))
+        // 추가 완료 후 상태 업데이트
+        addedSongIDs.insert(song.id)
     }
     
     private var searchTask: Task<Void, Error>?
@@ -216,7 +218,7 @@ final class ShazamViewModel: ObservableObject {
             tjNumber = cached.tj
         } else {
             tjNumber = await fetchTJNumber(title: song.title, artist: song.artistName) ?? "없음"
-            // TJ를 가져온 후 즉시 캐시에 저장 (Race condition 방지)
+            // TJ를 가져온 후 즉시 캐시에 저장
             karaokeCache[key] = KaraokeNumbers(tj: tjNumber, ky: "없음")
         }
         
@@ -228,7 +230,7 @@ final class ShazamViewModel: ObservableObject {
         )
         context.insert(newPlaylistSong)
         
-        // 3. KY 번호 처리 (캐시에 있으면 즉시 설정, 없으면 백그라운드에서 가져오기)
+        // 3. KY 번호 처리 (캐시에 있으면 즉시 설정, 없으면 백그라운드)
         if let cached = cached, cached.ky != "없음" {
             newPlaylistSong.kyNumber = cached.ky
             print("Playlist에 추가됨: \(song.title) - TJ: \(tjNumber), KY: \(cached.ky)")

@@ -4,6 +4,7 @@ import SwiftUI
 
 struct ShazamSearchView: View {
     @EnvironmentObject var container: DIContainer
+    @Environment(\.modelContext) private var context
     
     @StateObject var viewModel: ShazamViewModel
     @State private var previousScrollOffset: CGFloat = 0
@@ -52,20 +53,26 @@ struct ShazamSearchView: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(viewModel.results) { song in
-                    Button {
-                        viewModel.handleMusicSelection(song: song)
-                    } label: {
-                        MusicRowView(
-                            title: song.title,
-                            artistName: song.artistName,
-                            artworkURL: song.artworkURL,
-                            previewURL: song.previewURL,
-                            karaokeNumber: nil
-                        )
-                    }
+                    SearchMusicRowView(
+                        title: song.title,
+                        artistName: song.artistName,
+                        artworkURL: song.artworkURL,
+                        isAdded: viewModel.addedSongIDs.contains(song.id),
+                        onAdd: {
+                            Task {
+                                await viewModel.addSongFromSearch(
+                                    song: song,
+                                    context: context
+                                )
+                            }
+                        }
+                    )
                 }
             }
             .scrollTargetLayout()
+        }
+        .onAppear {
+            viewModel.loadAddedSongIDs(context: context)
         }
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y
