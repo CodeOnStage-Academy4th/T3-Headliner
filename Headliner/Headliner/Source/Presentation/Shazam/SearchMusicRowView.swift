@@ -7,37 +7,55 @@
 
 import SwiftUI
 
-/// 검색 결과 전용 Row 뷰 (+ 버튼 / 체크마크 표시)
 struct SearchMusicRowView: View {
     let title: String
     let artistName: String
     let artworkURL: URL?
+    let isPlaying: Bool
     let isAdded: Bool
+    let onPlay: () -> Void
     let onAdd: () -> Void
     
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 20) {
-                // 앨범 아트워크
-                CachedImageView(url: artworkURL)
-                    .frame(width: 48, height: 48)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                
-                // 제목 + 아티스트
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(title)
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-                        .font(.pretendardSemiBold18)
-                    Text(artistName)
-                        .foregroundStyle(.white.opacity(0.6))
-                        .lineLimit(1)
-                        .font(.pretendardSemiBold14)
+                HStack(spacing: 20) {
+                    ZStack {
+                        CachedImageView(url: artworkURL)
+                            .frame(width: 48, height: 48)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        
+                        // 재생 중 오버레이
+                        if isPlaying {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.black.opacity(0.4))
+                                .frame(width: 48, height: 48)
+                            
+                            Image(systemName: "pause.fill")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    
+                    // 제목 + 아티스트
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(title)
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .font(.pretendardSemiBold18)
+                        Text(artistName)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .lineLimit(1)
+                            .font(.pretendardSemiBold14)
+                    }
+                    
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onPlay()
                 }
                 
-                Spacer()
-                
-                // 추가 / 체크마크 버튼
                 addButton
             }
             .padding(.vertical, 16)

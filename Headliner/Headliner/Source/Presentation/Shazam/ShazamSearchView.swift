@@ -5,6 +5,7 @@ import SwiftUI
 struct ShazamSearchView: View {
     @EnvironmentObject var container: DIContainer
     @Environment(\.modelContext) private var context
+    @Environment(AudioPreviewManager.self) private var audioManager
     
     @StateObject var viewModel: ShazamViewModel
     @State private var previousScrollOffset: CGFloat = 0
@@ -57,7 +58,12 @@ struct ShazamSearchView: View {
                         title: song.title,
                         artistName: song.artistName,
                         artworkURL: song.artworkURL,
+                        isPlaying: audioManager.currentSong?.id == song.id
+                            && audioManager.isPlaying,
                         isAdded: viewModel.addedSongIDs.contains(song.id),
+                        onPlay: {
+                            audioManager.play(song: song)
+                        },
                         onAdd: {
                             Task {
                                 await viewModel.addSongFromSearch(

@@ -7,6 +7,7 @@ struct HomeView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var isScrolled: Bool = false
     @State private var isKeyboardVisible: Bool = false
+    @State private var audioManager = AudioPreviewManager()
 
     var body: some View {
         if #available(iOS 26, *) {
@@ -15,7 +16,7 @@ struct HomeView: View {
             legacyTabView
         }
     }
-    
+
     @available(iOS 26, *)
     private var ios26TabView: some View {
         TabView(selection: $container.activeTab) {
@@ -33,8 +34,15 @@ struct HomeView: View {
                 )
             }
         }
-        .tint(.white) // 선택된 아이콘 색상만 설정
+        .tint(.white)
         .tabBarMinimizeBehavior(.onScrollDown)
+        .overlay(alignment: .bottom) {
+            if audioManager.currentSong != nil {
+                MiniPlayerView()
+                    .padding(.bottom, 100)
+            }
+        }
+        .environment(audioManager)
         .environmentObject(container)
         .onAppear {
             container.setModelContext(modelContext)
@@ -49,8 +57,9 @@ struct HomeView: View {
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
-    
+
     // MARK: - iOS 26 미만
+
     private var legacyTabView: some View {
         TabView(selection: $container.activeTab) {
             MainListView(
@@ -71,17 +80,25 @@ struct HomeView: View {
             container.setModelContext(modelContext)
         }
         .overlay(alignment: .bottom) {
-            if !isKeyboardVisible && container.pathModel.paths.isEmpty {
-                CustomTabBar(
-                    isScrolled: $isScrolled,
-                    showsSearchBar: true,
-                    activeTab: $container.activeTab
-                )
-                .padding(.horizontal, 25)
-                .padding(.bottom, 30)
-                .background(.clear)
+            VStack(spacing: 12) {
+                // 미니 플레이어 (탭바 위에 배치)
+                if audioManager.currentSong != nil {
+                    MiniPlayerView()
+                }
+
+                if !isKeyboardVisible && container.pathModel.paths.isEmpty {
+                    CustomTabBar(
+                        isScrolled: $isScrolled,
+                        showsSearchBar: true,
+                        activeTab: $container.activeTab
+                    )
+                    .padding(.horizontal, 25)
+                    .background(.clear)
+                }
             }
+            .padding(.bottom, 30)
         }
+        .environment(audioManager)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             isKeyboardVisible = true
         }
@@ -95,6 +112,7 @@ struct HomeView: View {
 }
 
 // MARK: - ScrollOffsetPreferenceKey
+
 struct ScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
 

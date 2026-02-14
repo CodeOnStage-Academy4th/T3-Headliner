@@ -15,6 +15,7 @@ enum KaraokeType: String, CaseIterable {
 
 struct MainListView: View {
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
+    @Environment(AudioPreviewManager.self) private var audioManager
     
     var viewModel: PlaylistViewModel
     let viewTitle: String = "나의 뮤직 리스트"
@@ -119,12 +120,17 @@ struct MainListView: View {
             LazyVStack(spacing: 0) {
                 ForEach(playlists, id: \.id) { t in
                     let index = playlists.firstIndex(where: { $0.id == t.id }) ?? 0
+                    let isCurrent = audioManager.currentSong?.id == t.originalSong.id
+                        && audioManager.isPlaying
                     
                     MusicRowView(title: t.originalSong.title,
                                  artistName: t.originalSong.artistName,
                                  artworkURL: t.originalSong.artworkURL,
-                                 previewURL: t.originalSong.previewURL,
-                                 karaokeNumber: getKaraokeNumber(for: t))
+                                 karaokeNumber: getKaraokeNumber(for: t),
+                                 isPlaying: isCurrent)
+                        .onTapGesture {
+                            audioManager.play(song: t.originalSong)
+                        }
                         .swipeActions(edge: .trailing) {
                             Button {
                                 viewModel.deleteItems(
@@ -138,6 +144,12 @@ struct MainListView: View {
                             .tint(.clear)
                         }
                         .enableScrollViewSwipeActions()
+                }
+                
+                // 미니 플레이어가 보일 때 하단 여백
+                if audioManager.currentSong != nil {
+                    Spacer()
+                        .frame(height: 80)
                 }
             }
             .scrollTargetLayout()
