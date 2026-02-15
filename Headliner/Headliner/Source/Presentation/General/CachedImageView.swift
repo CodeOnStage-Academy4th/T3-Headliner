@@ -35,6 +35,7 @@ struct CachedImageView: View {
         .onChange(of: url) { _, newURL in
             // URL이 변경되면 이미지를 다시 로드
             image = nil
+            isLoading = false
             guard newURL != nil else { return }
             Task {
                 await loadImage()

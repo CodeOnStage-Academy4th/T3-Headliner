@@ -102,7 +102,7 @@ final class AudioPreviewManager {
                       duration.seconds.isFinite,
                       duration.seconds > 0 else { return }
                 
-                self.progress = time.seconds / duration.seconds
+                self.progress = min(max(time.seconds / duration.seconds, 0.0), 1.0)
             }
         }
     }
