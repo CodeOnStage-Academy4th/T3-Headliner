@@ -15,11 +15,8 @@ struct SwipeTestView: View {
                     .fill(.black.gradient)
                     .frame(height: 50)
                     .swipeActions {
-                        SwipeAction(symbolImage: "square.and.arrow.up.fill", tint: .white, background: .blue) { resetPosition in
-                            
-                        }
                         
-                        SwipeAction(symbolImage: "square.and.arrow.up.fill", tint: .white, background: .purple) { resetPosition in
+                        SwipeAction(symbolImage: .delete) { resetPosition in
                             
                         }
                     }

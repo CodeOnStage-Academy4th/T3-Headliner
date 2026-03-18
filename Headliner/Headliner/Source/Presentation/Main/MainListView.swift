@@ -14,31 +14,35 @@ enum KaraokeType: String, CaseIterable {
 }
 
 struct MainListView: View {
+    // MARK: - Properties
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
     @Environment(AudioPreviewManager.self) private var audioManager
-    
+
     var viewModel: PlaylistViewModel
-    let viewTitle: String = "나의 뮤직 리스트"
-    
     @Binding var isScrolled: Bool
+
     @State private var previousScrollOffset: CGFloat = 0
     @State private var selectedType: KaraokeType = .tj
-    
+
     private let scrollThreshold: CGFloat = 20
-    
-    // 선택된 타입에 따라 표시할 노래번호를 결정
-    private func getKaraokeNumber(for playlist: PlaylistMusic) -> String {
-        if selectedType == .tj {
-            return playlist.tjNumber ?? ""
-        } else {
-            return playlist.kyNumber ?? ""
-        }
+
+    // MARK: - Segment Picker Constants
+    private enum SegmentConstants {
+        static let itemWidth: CGFloat = 60
+        static let itemHeight: CGFloat = 36
+        static let padding: CGFloat = 4
     }
-    
+
+    // MARK: - Helper Methods
+    private func getKaraokeNumber(for playlist: PlaylistMusic) -> String {
+        selectedType == .tj ? playlist.tjNumber ?? "" : playlist.kyNumber ?? ""
+    }
+
+    // MARK: - Body
     var body: some View {
         ZStack {
             backgroundView.ignoresSafeArea(.all)
-            
+
             if playlists.isEmpty {
                 MusicListEmptyView()
             } else {
@@ -51,54 +55,56 @@ struct MainListView: View {
             previousScrollOffset = 0
         }
     }
-    
-    var musicListView: some View {
+
+    // MARK: - Music List View
+    private var musicListView: some View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
                 titleHeaderView
-                scrollView
+                musicScrollView
             }
-            bottomDeemedlayer
+            bottomDimmedLayer
         }
     }
-    
-    var titleHeaderView: some View {
+
+    // MARK: - Title Header
+    private var titleHeaderView: some View {
         HStack(alignment: .center) {
-            Text(viewTitle)
+            Text("나의 뮤직 리스트")
                 .font(.pretendardBold20)
                 .foregroundStyle(.white)
-            
+
             Spacer()
-            
+
             segmentPicker
         }
         .padding(.top, 40)
         .padding(.horizontal, 25)
         .padding(.bottom, 20)
     }
-    
-    var segmentPicker: some View {
+
+    // MARK: - Segment Picker
+    private var segmentPicker: some View {
         let items = KaraokeType.allCases
-        let width: CGFloat = 60
-        let height: CGFloat = 36
-        let padding: CGFloat = 4
-        
+        let selectedIndex = CGFloat(items.firstIndex(of: selectedType) ?? 0)
+
         return ZStack(alignment: .leading) {
+            // Background
             Capsule()
                 .fill(Color.white.opacity(0.1))
                 .frame(
-                    width: width * CGFloat(items.count) + padding * 2,
-                    height: height + padding * 2
+                    width: SegmentConstants.itemWidth * CGFloat(items.count) + SegmentConstants.padding * 2,
+                    height: SegmentConstants.itemHeight + SegmentConstants.padding * 2
                 )
-            
+
+            // Indicator
             Capsule()
                 .fill(Color.white)
-                .frame(width: width, height: height)
-                .offset(
-                    x: CGFloat(items.firstIndex(of: selectedType) ?? 0) * width + padding
-                )
+                .frame(width: SegmentConstants.itemWidth, height: SegmentConstants.itemHeight)
+                .offset(x: selectedIndex * SegmentConstants.itemWidth + SegmentConstants.padding)
                 .animation(.easeInOut(duration: 0.2), value: selectedType)
-            
+
+            // Buttons
             HStack(spacing: 0) {
                 ForEach(items, id: \.self) { type in
                     Button {
@@ -107,95 +113,85 @@ struct MainListView: View {
                         Text(type.rawValue)
                             .font(.pretendardSemiBold16)
                             .foregroundStyle(selectedType == type ? .black : .white)
-                            .frame(width: width, height: height)
+                            .frame(width: SegmentConstants.itemWidth, height: SegmentConstants.itemHeight)
                     }
                 }
             }
-            .padding(4)
+            .padding(SegmentConstants.padding)
         }
     }
-  
-    var scrollView: some View {
+
+    // MARK: - Music Scroll View
+    private var musicScrollView: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(playlists, id: \.id) { t in
-                    let index = playlists.firstIndex(where: { $0.id == t.id }) ?? 0
-                    let isCurrent = audioManager.currentSong?.id == t.originalSong.id
-                        && audioManager.isPlaying
-                    
-                    MusicRowView(title: t.originalSong.title,
-                                 artistName: t.originalSong.artistName,
-                                 artworkURL: t.originalSong.artworkURL,
-                                 karaokeNumber: getKaraokeNumber(for: t),
-                                 isPlaying: isCurrent)
-                        .onTapGesture {
-                            audioManager.play(song: t.originalSong)
-                        }
-                        .swipeActions(edge: .trailing) {
-                            Button {
-                                viewModel.deleteItems(
-                                    at: IndexSet(integer: index),
-                                    from: playlists
-                                )
-                            } label: {
-                                Image(.delete)
-                                    .offset(x: 3)
-                            }
-                            .tint(.clear)
-                        }
-                        .enableScrollViewSwipeActions()
+                    musicRow(for: t)
                 }
-                
-                // 미니 플레이어가 보일 때 하단 여백
-                if audioManager.currentSong != nil {
-                    Spacer()
-                        .frame(height: 80)
-                }
+
+                // 하단 여백: 미니 플레이어 + 스와이프 버튼 공간
+                Spacer()
+                    .frame(height: audioManager.currentSong != nil ? 150 : 100)
             }
             .scrollTargetLayout()
         }
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y
         } action: { _, newValue in
-            let delta = newValue - previousScrollOffset
-            
-            if delta > scrollThreshold {
-                // 아래로 스크롤 (content가 위로 올라감)
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isScrolled = true
-                }
-            } else if delta < -scrollThreshold {
-                // 위로 스크롤 (content가 아래로 내려감)
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    isScrolled = false
-                }
-            }
-            
-            previousScrollOffset = newValue
+            handleScroll(offset: newValue)
         }
     }
-    
+
+    // MARK: - Music Row
+    @ViewBuilder
+    private func musicRow(for t: PlaylistMusic) -> some View {
+        let index = playlists.firstIndex(where: { $0.id == t.id }) ?? 0
+        let isCurrent = audioManager.currentSong?.id == t.originalSong.id && audioManager.isPlaying
+
+        MusicRowView(
+            title: t.originalSong.title,
+            artistName: t.originalSong.artistName,
+            artworkURL: t.originalSong.artworkURL,
+            karaokeNumber: getKaraokeNumber(for: t),
+            isPlaying: isCurrent
+        )
+        .onTapGesture {
+            audioManager.play(song: t.originalSong)
+        }
+        .swipeActions {
+            SwipeAction(
+                symbolImage: UIImage(resource: .delete),
+                size: CGSize(width: 60, height: 60),
+                shape: AnyShape(RoundedRectangle(cornerRadius: 12))
+            ) { resetPosition in
+                viewModel.deleteItems(at: IndexSet(integer: index), from: playlists)
+                resetPosition = true
+            }
+        }
+        .enableScrollViewSwipeActions()
+    }
+
+    // MARK: - Background
     private var backgroundView: some View {
         GeometryReader { proxy in
             Image(.emptyBackground)
                 .resizable()
                 .scaledToFill()
-                .frame(width: proxy.size.width,
-                       height: proxy.size.height)
+                .frame(width: proxy.size.width, height: proxy.size.height)
                 .clipped()
         }
         .ignoresSafeArea()
     }
-    
-    @ViewBuilder
-    private var bottomDeemedlayer: some View {
+
+    // MARK: - Bottom Dimmed Layer
+    private var bottomDimmedLayer: some View {
         VStack(spacing: 0) {
             Spacer()
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color.black.opacity(1),
-                    Color.black.opacity(0.15),
-                    Color.black.opacity(0.0)
+                    .black.opacity(1),
+                    .black.opacity(0.15),
+                    .black.opacity(0)
                 ]),
                 startPoint: .bottom,
                 endPoint: .top
@@ -203,5 +199,21 @@ struct MainListView: View {
             .frame(height: 200)
         }
         .ignoresSafeArea(edges: .bottom)
+    }
+
+    private func handleScroll(offset: CGFloat) {
+        let delta = offset - previousScrollOffset
+
+        if delta > scrollThreshold {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isScrolled = true
+            }
+        } else if delta < -scrollThreshold {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isScrolled = false
+            }
+        }
+
+        previousScrollOffset = offset
     }
 }
