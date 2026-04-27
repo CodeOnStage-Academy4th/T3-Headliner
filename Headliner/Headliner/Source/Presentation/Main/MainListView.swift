@@ -8,11 +8,6 @@
 import SwiftData
 import SwiftUI
 
-enum KaraokeType: String, CaseIterable {
-    case tj = "TJ"
-    case ky = "KY"
-}
-
 struct MainListView: View {
     // MARK: - Properties
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
@@ -22,21 +17,10 @@ struct MainListView: View {
     @Binding var isScrolled: Bool
 
     @State private var previousScrollOffset: CGFloat = 0
-    @State private var selectedType: KaraokeType = .tj
+    @State private var selectedFilter: MusicFilterType = .all
+    @State private var selectedMusicForMenu: PlaylistMusic?
 
     private let scrollThreshold: CGFloat = 20
-
-    // MARK: - Segment Picker Constants
-    private enum SegmentConstants {
-        static let itemWidth: CGFloat = 60
-        static let itemHeight: CGFloat = 36
-        static let padding: CGFloat = 4
-    }
-
-    // MARK: - Helper Methods
-    private func getKaraokeNumber(for playlist: PlaylistMusic) -> String {
-        selectedType == .tj ? playlist.tjNumber ?? "" : playlist.kyNumber ?? ""
-    }
 
     // MARK: - Body
     var body: some View {
@@ -54,6 +38,13 @@ struct MainListView: View {
             isScrolled = false
             previousScrollOffset = 0
         }
+        .sheet(item: $selectedMusicForMenu) { music in
+            MusicActionSheetView(music: music)
+                .presentationDetents([.height(215)])
+                .presentationCornerRadius(34)
+                .presentationDragIndicator(.hidden)
+                .preferredColorScheme(.dark)
+        }
     }
 
     // MARK: - Music List View
@@ -61,6 +52,8 @@ struct MainListView: View {
         ZStack {
             VStack(alignment: .leading, spacing: 0) {
                 titleHeaderView
+                MusicFilterSegmentView(selection: $selectedFilter)
+                    .padding(.bottom, 10)
                 musicScrollView
             }
             bottomDimmedLayer
@@ -69,56 +62,13 @@ struct MainListView: View {
 
     // MARK: - Title Header
     private var titleHeaderView: some View {
-        HStack(alignment: .center) {
-            Text("나의 뮤직 리스트")
-                .font(.pretendardBold20)
-                .foregroundStyle(.white)
-
-            Spacer()
-
-            segmentPicker
-        }
-        .padding(.top, 40)
-        .padding(.horizontal, 25)
-        .padding(.bottom, 20)
-    }
-
-    // MARK: - Segment Picker
-    private var segmentPicker: some View {
-        let items = KaraokeType.allCases
-        let selectedIndex = CGFloat(items.firstIndex(of: selectedType) ?? 0)
-
-        return ZStack(alignment: .leading) {
-            // Background
-            Capsule()
-                .fill(Color.white.opacity(0.1))
-                .frame(
-                    width: SegmentConstants.itemWidth * CGFloat(items.count) + SegmentConstants.padding * 2,
-                    height: SegmentConstants.itemHeight + SegmentConstants.padding * 2
-                )
-
-            // Indicator
-            Capsule()
-                .fill(Color.white)
-                .frame(width: SegmentConstants.itemWidth, height: SegmentConstants.itemHeight)
-                .offset(x: selectedIndex * SegmentConstants.itemWidth + SegmentConstants.padding)
-                .animation(.easeInOut(duration: 0.2), value: selectedType)
-
-            // Buttons
-            HStack(spacing: 0) {
-                ForEach(items, id: \.self) { type in
-                    Button {
-                        selectedType = type
-                    } label: {
-                        Text(type.rawValue)
-                            .font(.pretendardSemiBold16)
-                            .foregroundStyle(selectedType == type ? .black : .white)
-                            .frame(width: SegmentConstants.itemWidth, height: SegmentConstants.itemHeight)
-                    }
-                }
-            }
-            .padding(SegmentConstants.padding)
-        }
+        Text("나의 뮤직 리스트")
+            .font(.pretendardBold20)
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 28)
+            .padding(.horizontal, 25)
+            .padding(.bottom, 10)
     }
 
     // MARK: - Music Scroll View
@@ -129,9 +79,9 @@ struct MainListView: View {
                     musicRow(for: t)
                 }
 
-                // 하단 여백: 미니 플레이어 + 스와이프 버튼 공간
+                // 하단 여백: 탭바/그라디언트 영역 확보
                 Spacer()
-                    .frame(height: audioManager.currentSong != nil ? 150 : 100)
+                    .frame(height: 100)
             }
             .scrollTargetLayout()
         }
@@ -145,30 +95,22 @@ struct MainListView: View {
     // MARK: - Music Row
     @ViewBuilder
     private func musicRow(for t: PlaylistMusic) -> some View {
-        let index = playlists.firstIndex(where: { $0.id == t.id }) ?? 0
         let isCurrent = audioManager.currentSong?.id == t.originalSong.id && audioManager.isPlaying
 
         MusicRowView(
             title: t.originalSong.title,
             artistName: t.originalSong.artistName,
             artworkURL: t.originalSong.artworkURL,
-            karaokeNumber: getKaraokeNumber(for: t),
-            isPlaying: isCurrent
+            tjNumber: t.tjNumber,
+            kyNumber: t.kyNumber,
+            isPlaying: isCurrent,
+            onMoreTap: {
+                selectedMusicForMenu = t
+            }
         )
         .onTapGesture {
             audioManager.play(song: t.originalSong)
         }
-        .swipeActions {
-            SwipeAction(
-                symbolImage: UIImage(resource: .delete),
-                size: CGSize(width: 60, height: 60),
-                shape: AnyShape(RoundedRectangle(cornerRadius: 12))
-            ) { resetPosition in
-                viewModel.deleteItems(at: IndexSet(integer: index), from: playlists)
-                resetPosition = true
-            }
-        }
-        .enableScrollViewSwipeActions()
     }
 
     // MARK: - Background
