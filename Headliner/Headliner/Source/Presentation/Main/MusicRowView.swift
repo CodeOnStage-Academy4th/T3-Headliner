@@ -16,9 +16,6 @@ struct MusicRowView: View {
     var isPlaying: Bool = false
     var onMoreTap: (() -> Void)? = nil
 
-    // 재생 중 하이라이트 색상 (#FF29FF)
-    private let accentMagenta = Color(hex: "FF29FF")
-
     var body: some View {
         HStack(spacing: 20) {
             CachedImageView(url: artworkURL)
@@ -31,10 +28,10 @@ struct MusicRowView: View {
                     if isPlaying {
                         Image(systemName: "play.fill")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(accentMagenta)
+                            .foregroundStyle(Color.accentMagenta)
                     }
                     Text(title)
-                        .foregroundStyle(isPlaying ? accentMagenta : .white)
+                        .foregroundStyle(isPlaying ? Color.accentMagenta : .white)
                         .lineLimit(1)
                         .font(.pretendardSemiBold18)
                 }

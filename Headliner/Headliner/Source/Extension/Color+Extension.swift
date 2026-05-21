@@ -24,4 +24,11 @@ public extension Color {
 
     static let subFontColor = Color(hex: "9A9FA5")
     static let subFontColorAlt = Color(hex: "888A90")
+    static let accentMagenta = Color(hex: "FF29FF")
+    static let sheetDivider = Color.white.opacity(0.1)
+    static let inputDivider = Color.white.opacity(0.25)
+    static let sheetGrabber = Color.white.opacity(0.4)
+    static let playlistArtworkBackground = Color(hex: "787878").opacity(0.2)
+    static let addPlaylistButtonBackground = Color(hex: "767680").opacity(0.12)
+    static let sheetCloseButtonBackground = Color(hex: "787880").opacity(0.16)
 }

@@ -16,7 +16,12 @@ struct HeadlinerApp: App {
 
     init() {
         do {
-            dataContainer = try ModelContainer(for: Song.self, PlaylistMusic.self)
+            dataContainer = try ModelContainer(
+                for: Song.self,
+                PlaylistMusic.self,
+                MusicPlaylist.self,
+                MusicPlaylistItem.self
+            )
         } catch {
             fatalError("\(error)")
         }

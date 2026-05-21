@@ -9,8 +9,26 @@ import SwiftData
 import SwiftUI
 
 struct MainListView: View {
+    private enum MainSheet: Identifiable {
+        case musicAction(PlaylistMusic)
+        case createPlaylist
+        case selectPlaylist(PlaylistMusic)
+
+        var id: String {
+            switch self {
+            case .musicAction(let music):
+                "musicAction-\(music.id)"
+            case .createPlaylist:
+                "createPlaylist"
+            case .selectPlaylist(let music):
+                "selectPlaylist-\(music.id)"
+            }
+        }
+    }
+
     // MARK: - Properties
     @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
+    @Query(sort: \MusicPlaylist.createdAt) private var musicPlaylists: [MusicPlaylist]
     @Environment(AudioPreviewManager.self) private var audioManager
 
     var viewModel: PlaylistViewModel
@@ -18,7 +36,7 @@ struct MainListView: View {
 
     @State private var previousScrollOffset: CGFloat = 0
     @State private var selectedFilter: MusicFilterType = .all
-    @State private var selectedMusicForMenu: PlaylistMusic?
+    @State private var activeSheet: MainSheet?
 
     private let scrollThreshold: CGFloat = 20
 
@@ -26,24 +44,15 @@ struct MainListView: View {
     var body: some View {
         ZStack {
             backgroundView.ignoresSafeArea(.all)
-
-            if playlists.isEmpty {
-                MusicListEmptyView()
-            } else {
-                musicListView
-            }
+            musicListView
         }
         .toolbarBackgroundVisibility(.hidden, for: .tabBar)
         .onAppear {
             isScrolled = false
             previousScrollOffset = 0
         }
-        .sheet(item: $selectedMusicForMenu) { music in
-            MusicActionSheetView(music: music)
-                .presentationDetents([.height(215)])
-                .presentationCornerRadius(34)
-                .presentationDragIndicator(.hidden)
-                .preferredColorScheme(.dark)
+        .sheet(item: $activeSheet) { sheet in
+            sheetView(for: sheet)
         }
     }
 
@@ -75,9 +84,7 @@ struct MainListView: View {
     private var musicScrollView: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                ForEach(playlists, id: \.id) { t in
-                    musicRow(for: t)
-                }
+                selectedListContent
 
                 // 하단 여백: 탭바/그라디언트 영역 확보
                 Spacer()
@@ -89,6 +96,41 @@ struct MainListView: View {
             geometry.contentOffset.y
         } action: { _, newValue in
             handleScroll(offset: newValue)
+        }
+    }
+
+    // MARK: - Selected List Content
+    @ViewBuilder
+    private var selectedListContent: some View {
+        switch selectedFilter {
+        case .all:
+            allMusicContent
+        case .playlist:
+            playlistContent
+        }
+    }
+
+    @ViewBuilder
+    private var allMusicContent: some View {
+        if playlists.isEmpty {
+            MusicListEmptyView()
+                .frame(height: 520)
+        } else {
+            ForEach(playlists, id: \.id) { t in
+                musicRow(for: t)
+            }
+        }
+    }
+
+    private var playlistContent: some View {
+        VStack(spacing: 0) {
+            PlaylistFolderRowView {
+                activeSheet = .createPlaylist
+            }
+
+            ForEach(musicPlaylists, id: \.id) { playlist in
+                PlaylistFolderRowView(playlist: playlist)
+            }
         }
     }
 
@@ -105,11 +147,51 @@ struct MainListView: View {
             kyNumber: t.kyNumber,
             isPlaying: isCurrent,
             onMoreTap: {
-                selectedMusicForMenu = t
+                activeSheet = .musicAction(t)
             }
         )
         .onTapGesture {
             audioManager.play(song: t.originalSong)
+        }
+    }
+
+    // MARK: - Sheet
+    @ViewBuilder
+    private func sheetView(for sheet: MainSheet) -> some View {
+        switch sheet {
+        case .musicAction(let music):
+            MusicActionSheetView(
+                music: music,
+                onAddToPlaylistTap: {
+                    activeSheet = .selectPlaylist(music)
+                }
+            )
+            .presentationDetents([.height(215)])
+            .presentationCornerRadius(34)
+            .presentationDragIndicator(.hidden)
+            .preferredColorScheme(.dark)
+
+        case .createPlaylist:
+            CreatePlaylistSheetView(
+                defaultTitle: viewModel.nextDefaultPlaylistTitle(from: musicPlaylists),
+                viewModel: viewModel
+            )
+            .presentationDetents([.height(788)])
+            .presentationCornerRadius(34)
+            .presentationDragIndicator(.hidden)
+            .presentationBackground(.clear)
+            .preferredColorScheme(.dark)
+
+        case .selectPlaylist(let music):
+            SelectPlaylistSheetView(
+                music: music,
+                viewModel: viewModel
+            )
+            .presentationDetents([.height(720)])
+            .presentationCornerRadius(34)
+            .presentationDragIndicator(.hidden)
+            .presentationBackground(.clear)
+            .preferredColorScheme(.dark)
         }
     }
 
