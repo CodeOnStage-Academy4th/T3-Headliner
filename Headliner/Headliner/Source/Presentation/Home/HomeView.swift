@@ -25,7 +25,7 @@ struct HomeView: View {
                 )
             }
         }
-        .tint(.white)
+        .tint(Color.accentMagenta)
         .tabBarMinimizeBehavior(.onScrollDown)
         .environment(audioManager)
         .environmentObject(container)
