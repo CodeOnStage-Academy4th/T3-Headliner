@@ -27,7 +27,7 @@ struct PlaylistFolderRowView: View {
         self.onTap = onTap
     }
 
-    init(playlist: MusicPlaylist) {
+    init(playlist: MusicPlaylist, onTap: (() -> Void)? = nil) {
         let musics = playlist.items
             .sorted { $0.addedAt < $1.addedAt }
             .compactMap(\.music)
@@ -36,7 +36,7 @@ struct PlaylistFolderRowView: View {
         songCount = musics.count
         artworkURLs = musics.prefix(4).map { $0.originalSong.artworkURL }
         kind = .playlist
-        onTap = nil
+        self.onTap = onTap
     }
 
     var body: some View {

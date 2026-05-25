@@ -11,10 +11,13 @@ struct CreatePlaylistSheetView: View {
     let viewModel: PlaylistViewModel
     let initialMusic: PlaylistMusic?
     let onCreate: ((MusicPlaylist) -> Void)?
+    let editingPlaylist: MusicPlaylist?
 
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isTitleFocused: Bool
     @State private var title: String
+
+    private var isEditing: Bool { editingPlaylist != nil }
 
     init(
         defaultTitle: String,
@@ -25,7 +28,19 @@ struct CreatePlaylistSheetView: View {
         self.viewModel = viewModel
         self.initialMusic = initialMusic
         self.onCreate = onCreate
+        self.editingPlaylist = nil
         _title = State(initialValue: defaultTitle)
+    }
+
+    init(
+        editing playlist: MusicPlaylist,
+        viewModel: PlaylistViewModel
+    ) {
+        self.viewModel = viewModel
+        self.initialMusic = nil
+        self.onCreate = nil
+        self.editingPlaylist = playlist
+        _title = State(initialValue: playlist.title)
     }
 
     var body: some View {
@@ -80,7 +95,7 @@ struct CreatePlaylistSheetView: View {
     // MARK: - Header
     private var header: some View {
         HStack {
-            Text("새 플레이리스트")
+            Text(isEditing ? "플레이리스트 이름 수정" : "새 플레이리스트")
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.white)
 
@@ -115,7 +130,7 @@ struct CreatePlaylistSheetView: View {
                 .focused($isTitleFocused)
                 .submitLabel(.done)
                 .onSubmit {
-                    createPlaylist()
+                    save()
                 }
 
             Rectangle()
@@ -128,27 +143,36 @@ struct CreatePlaylistSheetView: View {
     // MARK: - Add Button
     private var addButton: some View {
         Button {
-            createPlaylist()
+            save()
         } label: {
-            Text("추가하기")
+            Text(isEditing ? "수정하기" : "추가하기")
                 .font(.system(size: 18, weight: .medium))
         }
         .buttonStyle(CustomButtonStyle())
-        .disabled(!isAddEnabled)
-        .opacity(isAddEnabled ? 1 : 0.4)
+        .disabled(!isSaveEnabled)
+        .opacity(isSaveEnabled ? 1 : 0.4)
     }
 
-    private var isAddEnabled: Bool {
-        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    private var isSaveEnabled: Bool {
+        let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        if let editingPlaylist {
+            return trimmed != editingPlaylist.title
+        }
+        return true
     }
 
-    private func createPlaylist() {
-        guard let playlist = viewModel.createPlaylist(
-            title: title,
-            initialMusic: initialMusic
-        ) else { return }
-
-        onCreate?(playlist)
-        dismiss()
+    private func save() {
+        if let editingPlaylist {
+            viewModel.renamePlaylist(editingPlaylist, to: title)
+            dismiss()
+        } else {
+            guard let playlist = viewModel.createPlaylist(
+                title: title,
+                initialMusic: initialMusic
+            ) else { return }
+            onCreate?(playlist)
+            dismiss()
+        }
     }
 }

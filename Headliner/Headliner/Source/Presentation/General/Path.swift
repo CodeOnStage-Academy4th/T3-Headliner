@@ -11,7 +11,8 @@ import Combine
 enum PathType: Hashable, Identifiable {
     case loading
     case result(MusicSearchResult)
-    
+    case playlistDetail(MusicPlaylist)
+
     var id: Int {
         hashValue
     }

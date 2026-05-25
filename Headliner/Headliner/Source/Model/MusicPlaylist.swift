@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class MusicPlaylist: Identifiable {
+final class MusicPlaylist: Identifiable, Hashable {
     @Attribute(.unique) var id: String
     var title: String
     var createdAt: Date

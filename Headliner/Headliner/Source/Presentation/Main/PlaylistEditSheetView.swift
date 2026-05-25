@@ -1,30 +1,29 @@
 //
-//  MusicActionSheetView.swift
+//  PlaylistEditSheetView.swift
 //  Headliner
 //
-//  MusicRow의 점 세개 버튼 탭 시 표시되는 액션 시트 (UI only)
-//  Figma: node 819-6479 (Sheet - Inspector - iPhone)
+//  플레이리스트 편집(연필) 액션 시트 — 이름 변경 / 삭제
 //
 
 import SwiftUI
 
-struct MusicActionSheetView: View {
-    let music: PlaylistMusic
-    let onAddToPlaylistTap: () -> Void
+struct PlaylistEditSheetView: View {
+    let playlist: MusicPlaylist
+    let onRenameTap: () -> Void
     let onDeleteTap: () -> Void
-    @Environment(\.dismiss) private var dismiss
 
-    // 삭제 버튼 강조 색상 (#EB4B4B - Figma fill_53QOLV)
     private let destructiveColor = Color(hex: "EB4B4B")
-
-    // 구분선 색상 (Figma fill_BE54GU - rgba(255,255,255,0.1))
     private let dividerColor = Color.sheetDivider
+
+    private var songCount: Int {
+        playlist.items.compactMap(\.music).count
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             grabber
 
-            songRow
+            playlistRow
                 .padding(.horizontal, 25)
                 .padding(.bottom, 10)
                 .overlay(alignment: .bottom) {
@@ -40,7 +39,7 @@ struct MusicActionSheetView: View {
         }
     }
 
-    // MARK: - Grabber (Figma: Toolbar)
+    // MARK: - Grabber
 
     private var grabber: some View {
         VStack(spacing: 0) {
@@ -56,21 +55,17 @@ struct MusicActionSheetView: View {
         .padding(.bottom, 10)
     }
 
-    // MARK: - 선택된 곡 Row (Figma: Frame 65 inside Sheet)
+    // MARK: - Playlist Row
 
-    private var songRow: some View {
+    private var playlistRow: some View {
         HStack(spacing: 20) {
-            CachedImageView(url: music.originalSong.artworkURL)
-                .frame(width: 48, height: 48)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-
             VStack(alignment: .leading, spacing: 8) {
-                Text(music.originalSong.title)
+                Text(playlist.title)
                     .font(.pretendardSemiBold18)
                     .foregroundStyle(.white)
                     .lineLimit(1)
 
-                Text(music.originalSong.artistName)
+                Text("곡 \(songCount)개")
                     .font(.pretendardSemiBold14)
                     .foregroundStyle(.white.opacity(0.6))
                     .lineLimit(1)
@@ -80,30 +75,27 @@ struct MusicActionSheetView: View {
         }
     }
 
-    // MARK: - 액션 목록 (Figma: Frame 1437255801)
+    // MARK: - Action List
 
     private var actionList: some View {
         VStack(spacing: 0) {
             actionRow(
-                systemImage: "plus.circle",
-                text: "플레이리스트에 추가하기",
+                systemImage: "pencil.circle",
+                text: "플레이리스트 이름 변경하기",
                 tint: .white
             ) {
-                onAddToPlaylistTap()
+                onRenameTap()
             }
 
             actionRow(
                 systemImage: "minus.circle",
-                text: "삭제하기",
+                text: "플레이리스트 삭제하기",
                 tint: destructiveColor
             ) {
-                dismiss()
                 onDeleteTap()
             }
         }
     }
-
-    // MARK: - 액션 Row (Figma: Frame 1437255799 / 1437255800)
 
     private func actionRow(
         systemImage: String,

@@ -37,22 +37,37 @@ struct MainListView: View {
     @State private var previousScrollOffset: CGFloat = 0
     @State private var selectedFilter: MusicFilterType = .all
     @State private var activeSheet: MainSheet?
+    @State private var navigationPath: [PathType] = []
 
     private let scrollThreshold: CGFloat = 20
 
     // MARK: - Body
     var body: some View {
-        ZStack {
-            backgroundView.ignoresSafeArea(.all)
-            musicListView
-        }
-        .toolbarBackgroundVisibility(.hidden, for: .tabBar)
-        .onAppear {
-            isScrolled = false
-            previousScrollOffset = 0
-        }
-        .sheet(item: $activeSheet) { sheet in
-            sheetView(for: sheet)
+        NavigationStack(path: $navigationPath) {
+            ZStack {
+                backgroundView.ignoresSafeArea(.all)
+                musicListView
+            }
+            .toolbar(.hidden, for: .navigationBar)
+            .toolbarBackgroundVisibility(.hidden, for: .tabBar)
+            .navigationDestination(for: PathType.self) { pathType in
+                switch pathType {
+                case .playlistDetail(let playlist):
+                    PlaylistDetailView(
+                        playlist: playlist,
+                        viewModel: viewModel
+                    )
+                case .loading, .result:
+                    EmptyView()
+                }
+            }
+            .onAppear {
+                isScrolled = false
+                previousScrollOffset = 0
+            }
+            .sheet(item: $activeSheet) { sheet in
+                sheetView(for: sheet)
+            }
         }
     }
 
@@ -129,7 +144,9 @@ struct MainListView: View {
             }
 
             ForEach(musicPlaylists, id: \.id) { playlist in
-                PlaylistFolderRowView(playlist: playlist)
+                PlaylistFolderRowView(playlist: playlist) {
+                    navigationPath.append(.playlistDetail(playlist))
+                }
             }
         }
     }
@@ -164,6 +181,9 @@ struct MainListView: View {
                 music: music,
                 onAddToPlaylistTap: {
                     activeSheet = .selectPlaylist(music)
+                },
+                onDeleteTap: {
+                    viewModel.deleteMusicFromLibrary(music)
                 }
             )
             .presentationDetents([.height(215)])
@@ -223,6 +243,7 @@ struct MainListView: View {
             .frame(height: 200)
         }
         .ignoresSafeArea(edges: .bottom)
+        .allowsHitTesting(false)
     }
 
     private func handleScroll(offset: CGFloat) {

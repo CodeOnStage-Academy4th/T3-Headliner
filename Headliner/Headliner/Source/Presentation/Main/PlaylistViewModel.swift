@@ -116,6 +116,65 @@ extension PlaylistViewModel {
         }
     }
 
+    func renamePlaylist(
+        _ playlist: MusicPlaylist,
+        to newTitle: String
+    ) {
+        guard let modelContext = container.modelContext else {
+            print("@Log - ModelContext 사용 불가능")
+            return
+        }
+
+        let trimmed = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        playlist.title = trimmed
+        save(modelContext)
+    }
+
+    func deletePlaylist(_ playlist: MusicPlaylist) {
+        guard let modelContext = container.modelContext else {
+            print("@Log - ModelContext 사용 불가능")
+            return
+        }
+
+        modelContext.delete(playlist)
+        save(modelContext)
+    }
+
+    func removeMusic(
+        _ music: PlaylistMusic,
+        from playlist: MusicPlaylist
+    ) {
+        guard let modelContext = container.modelContext else {
+            print("@Log - ModelContext 사용 불가능")
+            return
+        }
+
+        let targetItems = playlist.items.filter { $0.music?.id == music.id }
+        guard !targetItems.isEmpty else { return }
+
+        targetItems.forEach { modelContext.delete($0) }
+        save(modelContext)
+    }
+
+    func deleteMusicFromLibrary(_ music: PlaylistMusic) {
+        guard let modelContext = container.modelContext else {
+            print("@Log - ModelContext 사용 불가능")
+            return
+        }
+
+        let allPlaylists = (try? modelContext.fetch(FetchDescriptor<MusicPlaylist>())) ?? []
+        for playlist in allPlaylists {
+            playlist.items
+                .filter { $0.music?.id == music.id }
+                .forEach { modelContext.delete($0) }
+        }
+
+        modelContext.delete(music)
+        save(modelContext)
+    }
+
     private func addMusic(
         _ music: PlaylistMusic,
         to playlist: MusicPlaylist,
