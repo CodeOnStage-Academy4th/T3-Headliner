@@ -9,7 +9,8 @@ struct ShazamSearchView: View {
     
     @StateObject var viewModel: ShazamViewModel
     @State private var previousScrollOffset: CGFloat = 0
-    
+    @State private var selectedSong: Song?
+
     @Binding var isScrolled: Bool
     
     private let scrollThreshold: CGFloat = 20
@@ -36,6 +37,8 @@ struct ShazamSearchView: View {
                         mediaItem: item.mediaItem,
                         result: item
                     )
+                case .playlistDetail:
+                    EmptyView()
                 }
             }
             .background {
@@ -65,12 +68,7 @@ struct ShazamSearchView: View {
                             audioManager.play(song: song)
                         },
                         onAdd: {
-                            Task {
-                                await viewModel.addSongFromSearch(
-                                    song: song,
-                                    context: context
-                                )
-                            }
+                            selectedSong = song
                         }
                     )
                 }
@@ -99,8 +97,20 @@ struct ShazamSearchView: View {
             
             previousScrollOffset = newValue
         }
+        .sheet(item: $selectedSong) { song in
+            ShazamAddMusicSheetView(
+                song: song,
+                shazamViewModel: viewModel,
+                playlistViewModel: PlaylistViewModel(container: container)
+            )
+            .presentationDetents([.height(720)])
+            .presentationCornerRadius(34)
+            .presentationDragIndicator(.hidden)
+            .presentationBackground(.clear)
+            .preferredColorScheme(.dark)
+        }
     }
-    
+
     private var shazamDefaultView: some View {
         VStack(alignment: .center, spacing: 0) {
             VStack(spacing: 24) {

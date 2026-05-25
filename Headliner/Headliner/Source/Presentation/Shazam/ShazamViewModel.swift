@@ -150,9 +150,9 @@ final class ShazamViewModel: ObservableObject {
     func addSongFromSearch(song: Song, context: ModelContext) async {
         // 이미 추가된 노래인지 확인
         guard !addedSongIDs.contains(song.id) else { return }
-        
-        let inserted = await addSong(song: song, context: context)
-        
+
+        let inserted = await addSong(song: song, context: context) != nil
+
         // 실제로 추가된 경우에만 상태 업데이트
         if inserted {
             addedSongIDs.insert(song.id)
@@ -192,7 +192,7 @@ final class ShazamViewModel: ObservableObject {
     
     @MainActor
     @discardableResult
-    func addSong(song: Song, context: ModelContext) async -> Bool {
+    func addSong(song: Song, context: ModelContext) async -> PlaylistMusic? {
         let songTitle = song.title
         let songArtist = song.artistName
         let descriptor = FetchDescriptor<PlaylistMusic>(
@@ -200,16 +200,16 @@ final class ShazamViewModel: ObservableObject {
                 $0.originalSong.title == songTitle && $0.originalSong.artistName == songArtist
             }
         )
-        
+
         do {
             let existing = try context.fetch(descriptor)
             guard existing.isEmpty else {
                 print("@Log - 노래가 플레이리스트에 이미 존재")
-                return false
+                return existing.first
             }
         } catch {
             print("@Log - \(error)")
-            return false
+            return nil
         }
 
         let key = getCacheKey(title: song.title, artist: song.artistName)
@@ -250,8 +250,8 @@ final class ShazamViewModel: ObservableObject {
                 }
             }
         }
-        
-        return true
+
+        return newPlaylistSong
     }
     
     
