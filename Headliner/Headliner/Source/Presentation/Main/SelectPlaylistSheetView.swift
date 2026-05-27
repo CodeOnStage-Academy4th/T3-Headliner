@@ -50,8 +50,7 @@ struct SelectPlaylistSheetView: View {
         .sheet(isPresented: $isCreatePlaylistPresented) {
             CreatePlaylistSheetView(
                 defaultTitle: viewModel.nextDefaultPlaylistTitle(from: playlists),
-                viewModel: viewModel,
-                initialMusic: music
+                viewModel: viewModel
             ) { playlist in
                 selectedPlaylistIDs.insert(playlist.id)
             }
