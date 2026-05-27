@@ -153,7 +153,7 @@ struct PlaylistDetailView: View {
                 music: music,
                 viewModel: viewModel
             )
-            .presentationDetents([.height(720)])
+            .presentationDetents([.height(788)])
             .presentationCornerRadius(34)
             .presentationDragIndicator(.hidden)
             .presentationBackground(.clear)

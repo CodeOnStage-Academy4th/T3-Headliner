@@ -80,7 +80,7 @@ struct ShazamSearchView: View {
         }
         .onScrollGeometryChange(for: CGFloat.self) { geometry in
             geometry.contentOffset.y
-        } action: { oldValue, newValue in
+        } action: { _, newValue in
             let delta = newValue - previousScrollOffset
             
             if delta > scrollThreshold {
@@ -103,7 +103,7 @@ struct ShazamSearchView: View {
                 shazamViewModel: viewModel,
                 playlistViewModel: PlaylistViewModel(container: container)
             )
-            .presentationDetents([.height(720)])
+            .presentationDetents([.height(788)])
             .presentationCornerRadius(34)
             .presentationDragIndicator(.hidden)
             .presentationBackground(.clear)
