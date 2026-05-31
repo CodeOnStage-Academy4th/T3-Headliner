@@ -77,10 +77,10 @@ struct SearchMusicRowView: View {
             // 이미 추가된 상태 - 체크마크
             Image(systemName: "checkmark")
                 .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(Color(red: 0, green: 1, blue: 1).opacity(0.6))
+                .foregroundStyle(Color.accentMagenta)
                 .frame(width: 60, height: 60)
                 .background(Color.clear)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .clipShape(Circle())
         } else {
             // 미추가 상태 - + 버튼
             Button {
@@ -91,7 +91,7 @@ struct SearchMusicRowView: View {
                     .foregroundStyle(.white.opacity(0.6))
                     .frame(width: 60, height: 60)
                     .background(.white.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(Circle())
             }
         }
     }
