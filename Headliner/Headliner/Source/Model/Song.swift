@@ -10,12 +10,15 @@ import SwiftData
 
 @Model
 class Song: Identifiable, Hashable {
-    var id: String
-    var title: String
-    var artistName: String
+    var id: String = ""
+    var title: String = ""
+    var artistName: String = ""
     var artworkURL: URL?
-    var previewURL: URL? // 미리듣기 URL
-    
+    var previewURL: URL?
+
+    @Relationship(deleteRule: .cascade, inverse: \PlaylistMusic.originalSong)
+    var playlistMusics: [PlaylistMusic]?
+
     init(
         id: String,
         title: String,

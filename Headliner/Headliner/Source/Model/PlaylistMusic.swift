@@ -4,11 +4,14 @@ import SwiftData
 
 @Model
 class PlaylistMusic: Identifiable {
-    @Attribute(.unique) var id: String = UUID().uuidString
-    var originalSong: Song
+    var id: String = UUID().uuidString
+    var originalSong: Song?
     var tjNumber: String?
     var kyNumber: String?
-    
+
+    @Relationship(deleteRule: .cascade, inverse: \MusicPlaylistItem.music)
+    var playlistItems: [MusicPlaylistItem]?
+
     init(
         originalSong: Song,
         tjNumber: String? = nil,
