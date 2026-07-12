@@ -111,7 +111,7 @@ extension PlaylistViewModel {
         _ music: PlaylistMusic,
         includedIn playlist: MusicPlaylist
     ) -> Bool {
-        playlist.items.contains { item in
+        (playlist.items ?? []).contains { item in
             item.music?.id == music.id
         }
     }
@@ -151,7 +151,7 @@ extension PlaylistViewModel {
             return
         }
 
-        let targetItems = playlist.items.filter { $0.music?.id == music.id }
+        let targetItems = (playlist.items ?? []).filter { $0.music?.id == music.id }
         guard !targetItems.isEmpty else { return }
 
         targetItems.forEach { modelContext.delete($0) }
@@ -166,7 +166,7 @@ extension PlaylistViewModel {
 
         let allPlaylists = (try? modelContext.fetch(FetchDescriptor<MusicPlaylist>())) ?? []
         for playlist in allPlaylists {
-            playlist.items
+            (playlist.items ?? [])
                 .filter { $0.music?.id == music.id }
                 .forEach { modelContext.delete($0) }
         }
@@ -190,7 +190,10 @@ extension PlaylistViewModel {
             music: music,
             playlist: playlist
         )
-        playlist.items.append(item)
+        if playlist.items == nil {
+            playlist.items = []
+        }
+        playlist.items?.append(item)
         modelContext.insert(item)
 
         if shouldSave {

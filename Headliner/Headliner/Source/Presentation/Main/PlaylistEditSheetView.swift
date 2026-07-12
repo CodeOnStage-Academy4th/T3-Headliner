@@ -16,7 +16,7 @@ struct PlaylistEditSheetView: View {
     private let dividerColor = Color.sheetDivider
 
     private var songCount: Int {
-        playlist.items.compactMap(\.music).count
+        (playlist.items ?? []).compactMap(\.music).count
     }
 
     var body: some View {

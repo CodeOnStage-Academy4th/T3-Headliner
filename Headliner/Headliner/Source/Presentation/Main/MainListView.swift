@@ -27,7 +27,7 @@ struct MainListView: View {
     }
 
     // MARK: - Properties
-    @Query(sort: \PlaylistMusic.originalSong.title) private var playlists: [PlaylistMusic]
+    @Query private var playlists: [PlaylistMusic]
     @Query(sort: \MusicPlaylist.createdAt) private var musicPlaylists: [MusicPlaylist]
     @Environment(AudioPreviewManager.self) private var audioManager
 
@@ -154,12 +154,12 @@ struct MainListView: View {
     // MARK: - Music Row
     @ViewBuilder
     private func musicRow(for t: PlaylistMusic) -> some View {
-        let isCurrent = audioManager.currentSong?.id == t.originalSong.id && audioManager.isPlaying
+        let isCurrent = audioManager.currentSong?.id == t.originalSong?.id && audioManager.isPlaying
 
         MusicRowView(
-            title: t.originalSong.title,
-            artistName: t.originalSong.artistName,
-            artworkURL: t.originalSong.artworkURL,
+            title: t.originalSong?.title ?? "",
+            artistName: t.originalSong?.artistName ?? "",
+            artworkURL: t.originalSong?.artworkURL,
             tjNumber: t.tjNumber,
             kyNumber: t.kyNumber,
             isPlaying: isCurrent,
@@ -168,7 +168,9 @@ struct MainListView: View {
             }
         )
         .onTapGesture {
-            audioManager.play(song: t.originalSong)
+            if let song = t.originalSong {
+                audioManager.play(song: song)
+            }
         }
     }
 

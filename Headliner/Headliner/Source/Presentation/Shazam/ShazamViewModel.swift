@@ -136,10 +136,10 @@ final class ShazamViewModel: ObservableObject {
     /// SwiftData에서 이미 추가된 노래 ID를 로드
     func loadAddedSongIDs(context: ModelContext) {
         let descriptor = FetchDescriptor<PlaylistMusic>()
-        
+
         do {
             let existing = try context.fetch(descriptor)
-            addedSongIDs = Set(existing.map { $0.originalSong.id })
+            addedSongIDs = Set(existing.compactMap { $0.originalSong?.id })
         } catch {
             print("@Log - addedSongIDs 로드 실패: \(error)")
         }
@@ -195,14 +195,13 @@ final class ShazamViewModel: ObservableObject {
     func addSong(song: Song, context: ModelContext) async -> PlaylistMusic? {
         let songTitle = song.title
         let songArtist = song.artistName
-        let descriptor = FetchDescriptor<PlaylistMusic>(
-            predicate: #Predicate {
-                $0.originalSong.title == songTitle && $0.originalSong.artistName == songArtist
-            }
-        )
+        let descriptor = FetchDescriptor<PlaylistMusic>()
 
         do {
-            let existing = try context.fetch(descriptor)
+            let allMusics = try context.fetch(descriptor)
+            let existing = allMusics.filter {
+                $0.originalSong?.title == songTitle && $0.originalSong?.artistName == songArtist
+            }
             guard existing.isEmpty else {
                 print("@Log - 노래가 플레이리스트에 이미 존재")
                 return existing.first

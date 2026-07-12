@@ -60,17 +60,17 @@ struct MusicActionSheetView: View {
 
     private var songRow: some View {
         HStack(spacing: 20) {
-            CachedImageView(url: music.originalSong.artworkURL)
+            CachedImageView(url: music.originalSong?.artworkURL)
                 .frame(width: 48, height: 48)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(music.originalSong.title)
+                Text(music.originalSong?.title ?? "")
                     .font(.pretendardSemiBold18)
                     .foregroundStyle(.white)
                     .lineLimit(1)
 
-                Text(music.originalSong.artistName)
+                Text(music.originalSong?.artistName ?? "")
                     .font(.pretendardSemiBold14)
                     .foregroundStyle(.white.opacity(0.6))
                     .lineLimit(1)
