@@ -8,6 +8,10 @@
 		<string>Pretendard-Medium.otf</string>
 		<string>Pretendard-SemiBold.otf</string>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>appleMusicDeveloperToken</key>
 	<string>eyJhbGciOiJFUzI1NiIsImtpZCI6IktYMjlINkNGN1QiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJVSDhMNDI0NE1CIiwiaWF0IjoxNzcwOTg3MjU1LCJleHAiOjE3ODY1MzkyNTV9._lmqZSrnGRFd_SXoB3g08AvuQNDbJ6J_yZiDj8Uz1_lek4rKg9WP5HO4M7Ku1vpVe26j7Zv_5PFCAJQU1y6tFw</string>
 </dict>

@@ -10,11 +10,12 @@ import SwiftData
 
 @Model
 final class MusicPlaylist: Identifiable, Hashable {
-    @Attribute(.unique) var id: String
-    var title: String
-    var createdAt: Date
+    var id: String = UUID().uuidString
+    var title: String = ""
+    var createdAt: Date = Date.now
+
     @Relationship(deleteRule: .cascade, inverse: \MusicPlaylistItem.playlist)
-    var items: [MusicPlaylistItem]
+    var items: [MusicPlaylistItem]?
 
     init(
         id: String = UUID().uuidString,
@@ -31,11 +32,10 @@ final class MusicPlaylist: Identifiable, Hashable {
 
 @Model
 final class MusicPlaylistItem: Identifiable {
-    @Attribute(.unique) var id: String
-    @Relationship(deleteRule: .nullify)
+    var id: String = UUID().uuidString
     var music: PlaylistMusic?
     var playlist: MusicPlaylist?
-    var addedAt: Date
+    var addedAt: Date = Date.now
 
     init(
         id: String = UUID().uuidString,

@@ -16,11 +16,21 @@ struct HeadlinerApp: App {
 
     init() {
         do {
-            dataContainer = try ModelContainer(
-                for: Song.self,
+            let schema = Schema([
+                Song.self,
                 PlaylistMusic.self,
                 MusicPlaylist.self,
                 MusicPlaylistItem.self
+            ])
+
+            let config = ModelConfiguration(
+                schema: schema,
+                cloudKitDatabase: .automatic
+            )
+
+            dataContainer = try ModelContainer(
+                for: schema,
+                configurations: config
             )
         } catch {
             fatalError("\(error)")

@@ -28,13 +28,13 @@ struct PlaylistFolderRowView: View {
     }
 
     init(playlist: MusicPlaylist, onTap: (() -> Void)? = nil) {
-        let musics = playlist.items
+        let musics = (playlist.items ?? [])
             .sorted { $0.addedAt < $1.addedAt }
             .compactMap(\.music)
 
         title = playlist.title
         songCount = musics.count
-        artworkURLs = musics.prefix(4).map { $0.originalSong.artworkURL }
+        artworkURLs = musics.prefix(4).map { $0.originalSong?.artworkURL }
         kind = .playlist
         self.onTap = onTap
     }

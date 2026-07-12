@@ -25,8 +25,8 @@ struct ShazamAddMusicSheetView: View {
     /// 검색 곡과 동일한(title+artist) 라이브러리 항목. 이미 추가된 경우에만 존재.
     private var existingMusic: PlaylistMusic? {
         allMusics.first {
-            $0.originalSong.title == song.title
-                && $0.originalSong.artistName == song.artistName
+            $0.originalSong?.title == song.title
+                && $0.originalSong?.artistName == song.artistName
         }
     }
 

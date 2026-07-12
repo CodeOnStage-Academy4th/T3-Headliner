@@ -14,7 +14,7 @@ struct SelectPlaylistRowView: View {
     let onTap: () -> Void
 
     private var musics: [PlaylistMusic] {
-        playlist.items
+        (playlist.items ?? [])
             .sorted { $0.addedAt < $1.addedAt }
             .compactMap(\.music)
     }
@@ -23,7 +23,7 @@ struct SelectPlaylistRowView: View {
         Button(action: onTap) {
             HStack(spacing: 20) {
                 PlaylistArtworkGridView(
-                    artworkURLs: musics.prefix(4).map { $0.originalSong.artworkURL }
+                    artworkURLs: musics.prefix(4).map { $0.originalSong?.artworkURL }
                 )
 
                 VStack(alignment: .leading, spacing: 6) {

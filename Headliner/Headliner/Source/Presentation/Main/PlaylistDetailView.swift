@@ -32,7 +32,7 @@ struct PlaylistDetailView: View {
     }
 
     private var musics: [PlaylistMusic] {
-        playlist.items
+        (playlist.items ?? [])
             .sorted { $0.addedAt < $1.addedAt }
             .compactMap(\.music)
     }
@@ -110,12 +110,12 @@ struct PlaylistDetailView: View {
 
     @ViewBuilder
     private func musicRow(for music: PlaylistMusic) -> some View {
-        let isCurrent = audioManager.currentSong?.id == music.originalSong.id && audioManager.isPlaying
+        let isCurrent = audioManager.currentSong?.id == music.originalSong?.id && audioManager.isPlaying
 
         MusicRowView(
-            title: music.originalSong.title,
-            artistName: music.originalSong.artistName,
-            artworkURL: music.originalSong.artworkURL,
+            title: music.originalSong?.title ?? "",
+            artistName: music.originalSong?.artistName ?? "",
+            artworkURL: music.originalSong?.artworkURL,
             tjNumber: music.tjNumber,
             kyNumber: music.kyNumber,
             isPlaying: isCurrent,
@@ -124,7 +124,9 @@ struct PlaylistDetailView: View {
             }
         )
         .onTapGesture {
-            audioManager.play(song: music.originalSong)
+            if let song = music.originalSong {
+                audioManager.play(song: song)
+            }
         }
     }
 
